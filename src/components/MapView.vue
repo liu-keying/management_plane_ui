@@ -86,8 +86,8 @@ const drawnWorldChart = (points, lines) => {
     geo: {
       type: 'map',
       map: 'world',
-      roam: true,
-      zoom: 1.2,
+      roam: false,
+      zoom: 1,
       scaleLimit: { min: 1, max: 10 },
       itemStyle: {
         areaColor: '#E0F7FA',
