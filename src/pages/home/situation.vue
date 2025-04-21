@@ -2,12 +2,10 @@
     <div class="scroll-container">
       <div v-for="(item, index) in internalList" :key="index" class="list-item">
         <div class="item-header">
-          <span class="item-block item-name">{{ item.from }} -> {{ item.to }}</span>
-          <span class="item-block tag role-tag" :class="'policy-' + item.policy">
-            {{ item.policy }}
-          </span>
-          <span class="item-block tag status-tag" :class="'status-' + item.status">
-            {{ item.status }}
+          <span class="item-block item-name">{{ item.name }}</span>
+          <span class="item-block item-name">{{ item.ipaddress }}</span>
+          <span class="item-block tag level-tag" :class="'level-' + item.level">
+            {{ item.level }}
           </span>
           <span class="item-block">
             <el-button size="small" type="primary" @click="goToDetail(item.id)">
@@ -29,12 +27,8 @@
   
   onMounted(() => {
     internalList.value = [
-      { id: 1, from: '节点 A', to: '节点 B', status: 'ACTIVE', policy: 'RANDOM'},
-      { id: 2, from: '节点 C', to: '节点 D', status: 'INACTIVE', policy: 'RANDOM'},
-      { id: 3, from: '节点 E', to: '节点 F', status: 'PENDING', policy: 'RECOMMEND'},
-      { id: 4, from: '节点 G', to: '节点 H', status: 'INACTIVE', policy: 'SPECIFIED'},
-      { id: 5, from: '节点 I', to: '节点 J', status: 'ACTIVE', policy: 'RANDOM'},
-      
+      { id: 1, name: '节点 C', ipaddress:'103.45.98.12',level: '高风险'},
+  
     ];
   });
   
@@ -103,29 +97,18 @@
     text-overflow: ellipsis;
   }
   
-  /* 🎨 角色颜色 */
-  .policy-RANDOM {
-    background-color: #1976d2;
-  }
   
-  .policy-RECOMMEND {
-    background-color: #7b1fa2;
-  }
-  
-  .policy-SPECIFIED {
-    background-color: #1f9ba2;
-  }
   
   /* 🎨 状态颜色 */
-  .status-ACTIVE {
+  .level-低风险 {
     background-color: #2e7d32;
   }
   
-  .status-PENDING {
+  .level-中风险 {
     background-color: #ef6c00;
   }
   
-  .status-INACTIVE {
+  .level-高风险 {
     background-color: #c62828;
   }
   </style>

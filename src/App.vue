@@ -18,7 +18,9 @@
         <el-menu-item index="/">首页</el-menu-item>
         <el-menu-item index="/node">节点信息</el-menu-item>
         <el-menu-item index="/link">链路信息</el-menu-item>
-        <el-menu-item index="/settings"></el-menu-item>
+        <el-menu-item index="/alert">故障告警</el-menu-item>
+        <el-menu-item index="/situation">态势感知</el-menu-item>
+        <el-menu-item index="/users">用户管理</el-menu-item>
       </el-menu>
 
       <!-- <div class="navbar-right">
@@ -45,7 +47,7 @@ const activeMenu = computed(() => route.path);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 60px;
+  height: 70px;
   background-color: #1976d2; /* 蓝色背景 */
   padding: 0 20px;
   color: white;
@@ -55,28 +57,29 @@ const activeMenu = computed(() => route.path);
   align-items: center;
 }
 .logo {
-  height: 32px;
+  height: 60px;
   margin-right: 12px;
 }
 .title {
-  font-size: 18px;
+  font-size: 30px;
   font-weight: bold;
-  color: white; /* 字体白色 */
+  color: white;
+  margin-top: auto;
+  margin-bottom: 15px; /* 靠近底部 */
 }
 .menu {
-  flex: 1;
+  flex: 29;
   margin-left: 40px;
+  font-size: 30px;
+}
+.el-menu-item {
+  padding: 0 24px; /* 扩大点击区域 */
+  font-size: 20px;
 }
 .navbar-right {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-.title {
-  font-size: 18px;
-  font-weight: bold;
-  color: white;
-  margin-top: auto;
-  margin-bottom: 4px; /* 靠近底部 */
-}
+
 </style>

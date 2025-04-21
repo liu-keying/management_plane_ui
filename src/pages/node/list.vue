@@ -64,10 +64,10 @@ const nodes = ref([]);
 const filters = ref({ status: '', role: '', cloudProvider: '' });
 
 const mockData = [
-  { nodeId: 1, nickname: 'Node A', status: 'ONLINE', role: 'DA', cloudProvider: 'aws' },
-  { nodeId: 2, nickname: 'Node B', status: 'OFFLINE', role: 'RELAY', cloudProvider: 'gcp' },
-  { nodeId: 3, nickname: 'Node C', status: 'ONLINE', role: 'RELAY', cloudProvider: 'azure' },
-  { nodeId: 4, nickname: 'Node D', status: 'DESTROYING', role: 'DA', cloudProvider: 'aws' }
+  { nodeId: 1, nickname: 'Node A', status: 'ONLINE', role: 'VPS_TE', cloudProvider: 'aws' },
+  { nodeId: 2, nickname: 'Node B', status: 'OFFLINE', role: 'VPS_RELAY', cloudProvider: 'gcp' },
+  { nodeId: 3, nickname: 'Node C', status: 'ONLINE', role: 'VPS_RELAY', cloudProvider: 'azure' },
+  { nodeId: 4, nickname: 'Node D', status: 'DESTROYING', role: 'VPS_TE', cloudProvider: 'aws' }
 ];
 
 const fetchNodes = async () => {

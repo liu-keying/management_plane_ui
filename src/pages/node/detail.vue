@@ -19,8 +19,7 @@
         <div class="detail-item"><strong>风险等级:</strong> {{ node.riskLevel }}</div>
         <div class="detail-item"><strong>CPU 使用率:</strong> {{ node.cpuUsage }}%</div>
         <div class="detail-item"><strong>内存使用量:</strong> {{ node.memoryUsage }} MB</div>
-        <div class="detail-item"><strong>经度:</strong> {{ node.longitude }}</div>
-        <div class="detail-item"><strong>纬度:</strong> {{ node.latitude }}</div>
+        <div class="detail-item"><strong>地理位置:</strong> {{ node.geo_location }}</div>
         <div class="detail-item"><strong>创建时间:</strong> {{ formatDate(node.createdAt) }}</div>
         <div class="detail-item"><strong>最后心跳:</strong> {{ formatDate(node.lastHeartbeat) }}</div>
       </div>
@@ -44,14 +43,15 @@
       nodeId: 1,
       nickname: "Node A",
       fingerprint: "abc123",
-      ipAddress: "192.168.1.1",
-      role: "DA",
+      ipAddress: "118.24.56.101",
+      role: "VPS_TE",
       status: "ONLINE",
       riskLevel: 3,
       cpuUsage: 45.6,
       memoryUsage: 2048,
-      longitude: 120.1234,
-      latitude: 30.5678,
+      // longitude: 120.1234,
+      // latitude: 30.5678,
+      geo_location: "120.1,30.5",
       cloudProvider: "aws",
       createdAt: "2025-03-20T10:15:30",
       lastHeartbeat: "2025-03-21T12:10:45"
