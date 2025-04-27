@@ -1,10 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomePage from '@/pages/home/index.vue';
-import NodeList from '@/pages/node/list.vue';
+import NodeList from '@/pages/node/index.vue';
 import NodeDetail from '@/pages/node/detail.vue';
 import NodeUpdate from '@/pages/node/update.vue';
 import NodeCreate from '@/pages/node/create.vue';
-import LinkList from '@/pages/link/list.vue';
+import LinkList from '@/pages/link/index.vue';
 import LinkDetail from '@/pages/link/detail.vue';
 import LinkCreate from '@/pages/link/create.vue';
 import LinkUpdate from '@/pages/link/update.vue';
