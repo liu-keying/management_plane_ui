@@ -1,14 +1,18 @@
 <template>
   <MapView :points="points" :lineConnections=[] />
-  <div class="container">
+  <!-- <div>
+    <button class="create-button" @click="goToCreate">创建节点</button>
+  </div> -->
+  <nodelist :list="points" />
+  <!-- <div class="container">
     <div class="header">
         <h2 class="title">节点列表</h2>
         <div>
           <button class="create-button" @click="goToCreate">创建节点</button>
         </div>
-      </div>
+      </div> -->
 
-    <table class="node-table">
+  <!-- <table class="node-table">
       <thead>
         <tr>
           <th>节点名称</th>
@@ -49,7 +53,7 @@
         </tr>
       </tbody>
     </table>
-  </div>
+  </div> -->
 </template>
 
 <script setup>
@@ -58,6 +62,7 @@ import axios from 'axios';
 import useGlobalConfig from '@/composables/useGlobalConfig';
 import { useRouter } from 'vue-router';
 import MapView from "@/components/MapView.vue";
+import nodelist from "@/components/nodelist.vue";
 const points = [
   { id: 1, name: '节点 A', ipaddress: '118.24.56.101', role: 'CLIENT', status: 'ONLINE', value: [-97.822, 52.751] },
   { id: 2, name: '节点 B', ipaddress: '156.234.72.99', role: 'VPS_RELAY', status: 'OFFLINE', value: [120, 30] },
@@ -105,10 +110,8 @@ const goToNodeDetail = (nodeId) => {
 };
 
 const goToCreate = () => {
-    router.push(`/node/create`);
-  };
+  router.push(`/node/create`);
+};
 
 onMounted(fetchNodes);
 </script>
-
-

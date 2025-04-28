@@ -39,7 +39,24 @@ import { useRoute } from 'vue-router';
 import { computed } from 'vue';
 
 const route = useRoute();
-const activeMenu = computed(() => route.path);
+
+// 计算当前活跃的菜单项
+const activeMenu = computed(() => {
+  // 判断当前路径，并返回对应的菜单栏
+  if (route.path.startsWith('/node')) {
+    return '/node';
+  } else if (route.path.startsWith('/link')) {
+    return '/link';
+  } else if (route.path.startsWith('/alert')) {
+    return '/alert';
+  } else if (route.path.startsWith('/situation')) {
+    return '/situation';
+  } else if (route.path.startsWith('/users')) {
+    return '/users';
+  } else {
+    return '/'; // 默认为首页
+  }
+});
 </script>
 
 <style scoped>
@@ -48,9 +65,18 @@ const activeMenu = computed(() => route.path);
   justify-content: space-between;
   align-items: center;
   height: 70px;
-  background-color: #1976d2; /* 蓝色背景 */
+  background-color: #1976d2;
   padding: 0 20px;
   color: white;
+  position: fixed; /* 固定在页面顶部 */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000; /* 保证在最上层 */
+}
+
+.el-main {
+  padding-top: 90px; /* 留出空间，大于 header 高度一点 */
 }
 .navbar-left {
   display: flex;

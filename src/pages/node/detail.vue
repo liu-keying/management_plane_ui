@@ -1,149 +1,367 @@
 <template>
-    <div class="container">
-      <div class="header">
-        <h2 class="title">节点详情</h2>
-        <div>
-          <button class="edit-button" @click="goToUpdate">修改节点</button>
-          <button class="back-button" @click="goBack">返回</button>
-        </div>
+  <div class="node-detail">
+    <MapView :points="points" :lineConnections="[]" />
+    <el-card :body-style="{ padding: '20px' }" class="detail-card">
+      <!-- <h2 class="title">节点详细信息</h2> -->
+
+      <div class="detail-info">
+        <el-row :gutter="20">
+          <el-col :span="6">
+            <div class="info-item">
+              <span class="label">节点ID:</span>
+              <span>{{ node.nodeId }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">昵称:</span>
+              <span>{{ node.nickname }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">IP地址:</span>
+              <span>{{ node.ipAddress }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">指纹:</span>
+              <span>{{ node.fingerprint }}</span>
+            </div>
+
+          </el-col>
+
+          <el-col :span="6">
+
+            <div class="info-item">
+              <span class="label">CPU使用率:</span>
+              <span>{{ node.cpuUsage }}%</span>
+            </div>
+            <div class="info-item">
+              <span class="label">内存使用:</span>
+              <span>{{ node.memoryUsage }}%</span>
+            </div>
+            <div class="info-item">
+              <span class="label">流量(进):</span>
+              <span>{{ formatTraffic(node.trafficIn) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">流量(出):</span>
+              <span>{{ formatTraffic(node.trafficOut) }}</span>
+            </div>
+          </el-col>
+
+          <el-col :span="6">
+            <div class="info-item">
+              <span class="label">角色:</span>
+              <span>{{ node.role }}</span>
+              <!-- <span :class="roleClass(node.role)">{{ node.role }}</span> -->
+            </div>
+            <div class="info-item">
+              <span class="label">状态:</span>
+              <span> {{ node.status }} </span>
+              <!-- <el-tag :type="statusTagType(node.status)" size="small">{{ node.status }}</el-tag> -->
+            </div>
+            <div class="info-item">
+              <span class="label">风险等级:</span>
+              <span>{{ node.riskLevel }}</span>
+            </div>
+
+            <div class="info-item">
+              <span class="label">云提供商:</span>
+              <span>{{ node.cloudProvider }}</span>
+            </div>
+
+          </el-col>
+
+          <el-col :span="6">
+            <div class="info-item">
+              <span class="label">地理位置:</span>
+              <span>{{ node.geoLocation }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">创建时间:</span>
+              <span>{{ formatDate(node.createdAt) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">创建人:</span>
+              <span>{{ node.createdBy }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">最后心跳:</span>
+              <span>{{ formatDate(node.lastHeartbeat) }}</span>
+            </div>
+          </el-col>
+        </el-row>
       </div>
-      
-      <div v-if="node" class="details-grid">
-        <div class="detail-item"><strong>节点名称:</strong> {{ node.nickname }}</div>
-        <div class="detail-item"><strong>节点 ID:</strong> {{ node.nodeId }}</div>
-        <div class="detail-item"><strong>指纹:</strong> {{ node.fingerprint }}</div>
-        <div class="detail-item"><strong>IP 地址:</strong> {{ node.ipAddress }}</div>
-        <div class="detail-item"><strong>角色:</strong> {{ node.role }}</div>
-        <div class="detail-item"><strong>状态:</strong> {{ node.status }}</div>
-        <div class="detail-item"><strong>云提供商:</strong> {{ node.cloudProvider }}</div>
-        <div class="detail-item"><strong>风险等级:</strong> {{ node.riskLevel }}</div>
-        <div class="detail-item"><strong>CPU 使用率:</strong> {{ node.cpuUsage }}%</div>
-        <div class="detail-item"><strong>内存使用量:</strong> {{ node.memoryUsage }} MB</div>
-        <div class="detail-item"><strong>地理位置:</strong> {{ node.geo_location }}</div>
-        <div class="detail-item"><strong>创建时间:</strong> {{ formatDate(node.createdAt) }}</div>
-        <div class="detail-item"><strong>最后心跳:</strong> {{ formatDate(node.lastHeartbeat) }}</div>
+      <!-- 按钮区域 -->
+      <div class="action-buttons">
+        <el-button type="primary" @click="openDialog('createRelay')">创建 RELAY</el-button>
+        <el-button type="warning" @click="openDialog('updateNode')">更新节点</el-button>
+        <el-button type="danger" @click="openDialog('destroyNode')">销毁节点</el-button>
       </div>
-      <p v-else>正在加载节点详情...</p>
-    </div>
-  </template>
-  
-  <script setup>
-  import { ref, onMounted } from 'vue';
-  import axios from 'axios';
-  import { useRoute, useRouter } from 'vue-router';
-  import useGlobalConfig from '@/composables/useGlobalConfig';
-  
-  const route = useRoute();
-  const router = useRouter();
-  const { useMock } = useGlobalConfig();
-  const node = ref(null);
-  
-  const mockData = [
-    {
-      nodeId: 1,
-      nickname: "Node A",
-      fingerprint: "abc123",
-      ipAddress: "118.24.56.101",
-      role: "VPS_TE",
-      status: "ONLINE",
-      riskLevel: 3,
-      cpuUsage: 45.6,
-      memoryUsage: 2048,
-      // longitude: 120.1234,
-      // latitude: 30.5678,
-      geo_location: "120.1,30.5",
-      cloudProvider: "aws",
-      createdAt: "2025-03-20T10:15:30",
-      lastHeartbeat: "2025-03-21T12:10:45"
-    },
-    {
-      nodeId: 2,
-      nickname: "Node B",
-      fingerprint: "def456",
-      ipAddress: "192.168.1.2",
-      role: "RELAY",
-      status: "OFFLINE",
-      riskLevel: 2,
-      cpuUsage: 30.2,
-      memoryUsage: 1024,
-      longitude: 118.9876,
-      latitude: 32.6543,
-      cloudProvider: "gcp",
-      createdAt: "2024-02-15T08:30:00",
-      lastHeartbeat: "2024-02-16T14:45:20"
+    </el-card>
+    <!-- 弹窗 -->
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="400px">
+      <template v-if="currentAction === 'updateNode'">
+        <el-form :model="editForm" label-width="100px">
+          <el-form-item label="节点ID">
+            <el-input v-model="editForm.nodeId" />
+          </el-form-item>
+          <el-form-item label="昵称">
+            <el-input v-model="editForm.nickname" />
+          </el-form-item>
+          <el-form-item label="角色">
+            <el-select v-model="editForm.role" placeholder="选择角色">
+              <el-option label="VPS_TE" value="VPS_TE" />
+              <el-option label="VPS_RELAY" value="VPS_RELAY" />
+              <el-option label="CLIENT" value="CLIENT" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="状态">
+            <el-select v-model="editForm.status" placeholder="选择状态">
+              <el-option label="ONLINE" value="ONLINE" />
+              <el-option label="OFFLINE" value="OFFLINE" />
+              <el-option label="DESTROYING" value="DESTROYING" />
+            </el-select>
+          </el-form-item>
+        </el-form>
+      </template>
+      <template v-else>
+        <span>{{ dialogMessage }}</span>
+      </template>
+
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmAction">确认</el-button>
+      </template>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import { ElButton, ElDialog, ElTag, ElRow, ElCol, ElCard } from 'element-plus';
+import { ElMessage } from 'element-plus';
+
+
+import MapView from '@/components/MapView.vue';
+
+
+// 弹窗控制
+const dialogVisible = ref(false);
+const dialogTitle = ref('');
+const dialogMessage = ref('');
+const currentAction = ref('');
+
+const editForm = ref({
+  nodeId: '',
+  nickname: '',
+  role: '',
+  status: ''
+});
+
+
+// 打开弹窗
+const openDialog = (action) => {
+  currentAction.value = action;
+  if (action === 'createRelay') {
+    dialogTitle.value = '创建 RELAY';
+    dialogMessage.value = '确定要在此节点创建 RELAY 吗？';
+  } else if (action === 'updateNode') {
+    dialogTitle.value = '更新节点';
+    // 填充 editForm
+    editForm.value = {
+      nodeId: node.value.nodeId,
+      nickname: node.value.nickname,
+      role: node.value.role,
+      status: node.value.status,
+    };
+  } else if (action === 'destroyNode') {
+    dialogTitle.value = '销毁节点';
+    dialogMessage.value = '确定要销毁此节点吗？';
+  }
+  dialogVisible.value = true;
+};
+
+// 点击确认按钮
+const confirmAction = async () => {
+  dialogVisible.value = false;
+
+  try {
+    if (currentAction.value === 'createRelay') {
+      console.log('创建 RELAY', node.value);
+      // TODO: 调用创建 RELAY 的 API
+      // await apiCreateRelay(node.value.nodeId);
+
+      ElMessage.success('RELAY 创建成功');
+    } else if (currentAction.value === 'updateNode') {
+      console.log('更新节点，新的数据：', editForm.value);
+      // TODO: 调用更新节点的 API
+      // await apiUpdateNode(editForm.value);
+
+      // 同步本地 node
+      node.value.nodeId = editForm.value.nodeId;
+      node.value.nickname = editForm.value.nickname;
+      node.value.role = editForm.value.role;
+      node.value.status = editForm.value.status;
+
+      ElMessage.success('节点更新成功');
+    } else if (currentAction.value === 'destroyNode') {
+      console.log('销毁节点', node.value);
+      // TODO: 调用销毁节点的 API
+      // await apiDestroyNode(node.value.nodeId);
+
+      ElMessage.success('节点销毁成功');
     }
+  } catch (error) {
+    console.error('操作失败', error);
+    ElMessage.error('操作失败，请重试');
+  }
+};
+
+
+
+const route = useRoute();
+
+// 模拟数据：根据路由获取节点ID，加载节点详情
+const nodeId = route.params.nodeId; // 假设路由传递了节点ID
+
+const node = ref({});
+
+const points = ref([]);
+
+// 模拟从API或数据库获取节点数据
+const fetchNodeDetail = () => {
+  // 模拟请求数据
+  const mockData = {
+    nodeId: nodeId,
+    nickname: "Node 1",
+    fingerprint: "123456abcdef",
+    ipAddress: "192.168.1.1",
+    role: "CLIENT",
+    status: "ONLINE",
+    riskLevel: 3,
+    cpuUsage: 75.5,
+    memoryUsage: 60,
+    trafficIn: 1000000,
+    trafficOut: 500000,
+    geoLocation: "Beijing, China",
+    cloudProvider: "AWS",
+    createdAt: "2023-01-01T12:00:00",
+    createdBy: "admin",
+    lastHeartbeat: "2023-04-26T15:00:00",
+    longitude: 116.4,
+    latitude: 39.9,
+  };
+
+  // 设置节点数据
+  node.value = mockData;
+
+
+  // 更新 points 中的 value
+  points.value = [
+    { id: nodeId, value: [mockData.longitude, mockData.latitude] }
   ];
-  
-  const fetchNodeDetail = async () => {
-    if (useMock.value) {
-      node.value = mockData.find(n => n.nodeId === Number(route.params.nodeId)) || null;
-    } else {
-      try {
-        const response = await axios.get(`/api/nodes/${route.params.nodeId}`);
-        node.value = response.data;
-      } catch (error) {
-        console.error('获取节点详情失败:', error);
-      }
-    }
-  };
-  
-  const formatDate = (dateTime) => {
-    return dateTime ? new Date(dateTime).toLocaleString() : 'N/A';
-  };
-  
-  const goBack = () => {
-    router.push('/node');
-  };
-  
-  const goToUpdate = () => {
-    router.push(`/node/${route.params.nodeId}/update`);
-  };
-  
-  onMounted(fetchNodeDetail);
-  </script>
-  
-  <style scoped>
-  .container {
-    padding: 20px;
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
+};
+
+
+// 格式化日期
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleString();
+};
+
+// 格式化流量
+const formatTraffic = (traffic) => {
+  if (traffic >= 1000000) {
+    return (traffic / 1000000).toFixed(2) + " MB";
+  } else if (traffic >= 1000) {
+    return (traffic / 1000).toFixed(2) + " KB";
+  } else {
+    return traffic + " B";
   }
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
+};
+
+// 根据状态返回合适的标签类型
+const statusTagType = (status) => {
+  switch (status) {
+    case "ONLINE":
+      return "success";
+    case "OFFLINE":
+      return "warning";
+    case "DESTROYING":
+      return "danger";
+    default:
+      return "info";
   }
-  .title {
-    font-size: 24px;
-    margin: 0;
+};
+
+// 根据角色返回不同的样式
+const roleClass = (role) => {
+  switch (role) {
+    case "VPS_TE":
+      return "role-vps-te";
+    case "VPS_RELAY":
+      return "role-vps-relay";
+    case "CLIENT":
+      return "role-client";
+    default:
+      return "";
   }
-  .back-button, .edit-button {
-    padding: 8px 16px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-left: 10px;
-  }
-  .back-button:hover, .edit-button:hover {
-    background-color: #0056b3;
-  }
-  .details-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-  .detail-item {
-    padding: 8px;
-    background: #f9f9f9;
-    border-radius: 4px;
-  }
-  p {
-    font-size: 16px;
-    margin: 5px 0;
-  }
-  </style>
-  
+};
+
+// 页面加载时获取节点数据
+onMounted(() => {
+  fetchNodeDetail();
+});
+</script>
+
+<style scoped>
+.node-detail {
+  padding: 20px;
+}
+
+.detail-card {
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.detail-info .info-item {
+  margin-bottom: 16px;
+}
+
+.detail-info .label {
+  font-weight: bold;
+  margin-right: 10px;
+  color: #333;
+}
+
+.role-vps-te {
+  color: #fff;
+  background-color: #1976d2;
+}
+
+.role-vps-relay {
+  color: #fff;
+  background-color: #7b1fa2;
+}
+
+.role-client {
+  color: #fff;
+  background-color: #1f9ba2;
+}
+
+.action-buttons {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.action-buttons .el-button {
+  margin-left: 10px;
+}
+
+</style>
