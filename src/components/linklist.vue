@@ -39,7 +39,7 @@
   });
   
   const goToDetail = (id) => {
-    router.push(`/node/${id}`);
+    router.push(`/link/${id}`);
   };
   </script>
   

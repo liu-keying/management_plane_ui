@@ -1,6 +1,10 @@
 <template>
+  <MapView :points="points" :lineConnections="lineConnections"/>
+  <el-button type="primary" @click="openDialog('createCircuit')">创建电路</el-button>
+  <linklist/>
     <div class="container">
-      <div class="header">
+      
+      <!-- <div class="header">
           <h2 class="title">链路列表</h2>
           <div>
             <button class="create-button" @click="goToCreate">创建链路</button>
@@ -36,7 +40,7 @@
             <td colspan="4">没有找到符合条件的链路。</td>
           </tr>
         </tbody>
-      </table>
+      </table> -->
     </div>
   </template>
   
@@ -45,6 +49,25 @@
   import axios from 'axios';
   import useGlobalConfig from '@/composables/useGlobalConfig';
   import { useRouter } from 'vue-router';
+  import MapView from '@/components/MapView.vue';
+  import linklist from '@/components/linklist.vue';
+
+  const points = [
+  { id: 1, name: '节点 A', ipaddress: '118.24.56.101', role: 'CLIENT', status: 'ONLINE', value: [116.4,39.9] },
+  { id: 2, name: '节点 B', ipaddress: '156.234.72.99', role: 'VPS_RELAY', status: 'OFFLINE', value: [120, 30] },
+  { id: 3, name: '节点 C', ipaddress: '103.45.98.12', role: 'VPS_TE', status: 'DESTROYING', value: [104.195, 35.8617] },
+  { id: 4, name: '节点 D', ipaddress: '139.224.8.33', role: 'CLIENT', status: 'ONLINE', value: [-74.006, 40.7128] },
+  { id: 5, name: '节点 E', ipaddress: '120.27.12.55', role: 'CLIENT', status: 'ONLINE', value: [-50.4074, -24.9042] },
+  { id: 6, name: '节点 F', ipaddress: '104.193.88.121', role: 'VPS_RELAY', status: 'DESTROYING', value: [110, 40] },
+  { id: 7, name: '节点 G', ipaddress: '185.220.101.14', role: 'VPS_RELAY', status: 'OFFLINE', value: [120.195, 35.8617] }
+];
+
+const lineConnections = [
+  [1, 2],
+  [3, 4],
+  [5, 4],
+  [3, 6],
+];
   
   const { useMock } = useGlobalConfig();
   const router = useRouter();

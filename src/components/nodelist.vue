@@ -1,97 +1,62 @@
 <template>
   <div>
-    <!-- 表头+筛选器 -->
-    <div class="list-header">
-      <!-- 名称列 -->
-      <div class="header-cell">
-        <span>名称</span>
-        <div class="filter-placeholder"></div> <!-- 不筛选，占位 -->
-      </div>
+    <!-- 筛选器 -->
+    <div class="filter-bar">
+      <el-input v-model="searchKeyword" placeholder="搜索 ID / 昵称 / IP地址" clearable class="filter-item search-input">
+        <template #prefix>
+          <el-icon>
+            <Search />
+          </el-icon>
+        </template>
+      </el-input>
+      <el-select v-model="selectedRole" placeholder="选择角色" clearable class="filter-item">
+        <el-option v-for="role in roleOptions" :key="role" :label="role" :value="role" />
+      </el-select>
 
-      <!-- IP地址列 -->
-      <div class="header-cell">
-        <span>IP地址</span>
-        <div class="filter-placeholder"></div> <!-- 不筛选，占位 -->
-      </div>
+      <el-select v-model="selectedStatus" placeholder="选择状态" clearable class="filter-item">
+        <el-option v-for="status in statusOptions" :key="status" :label="status" :value="status" />
+      </el-select>
 
-      <!-- 角色列 -->
-      <div class="header-cell">
-        <span>角色</span>
-        <el-select
-          v-model="selectedRole"
-          placeholder="选择角色"
-          clearable
-          size="small"
-          class="filter-select"
-        >
-          <el-option
-            v-for="role in roleOptions"
-            :key="role"
-            :label="role"
-            :value="role"
-          />
-        </el-select>
-      </div>
-
-      <!-- 状态列 -->
-      <div class="header-cell">
-        <span>状态</span>
-        <el-select
-          v-model="selectedStatus"
-          placeholder="选择状态"
-          clearable
-          size="small"
-          class="filter-select"
-        >
-          <el-option
-            v-for="status in statusOptions"
-            :key="status"
-            :label="status"
-            :value="status"
-          />
-        </el-select>
-      </div>
-
-      <!-- 操作列 -->
-      <div class="header-cell">
-        <span>操作</span>
-        <div class="filter-placeholder"></div> <!-- 不筛选，占位 -->
-      </div>
     </div>
 
-    <!-- 滚动区域 -->
-    <div class="scroll-container">
-      <div
-        v-for="(item, index) in filteredList"
-        :key="index"
-        class="list-item"
-      >
-        <div class="item-header">
-          <span class="item-block item-name">{{ item.name }}</span>
-          <span class="item-block item-name">{{ item.ipaddress }}</span>
-          <span class="item-block tag role-tag" :class="'role-' + item.role">
-            {{ item.role }}
-          </span>
-          <span class="item-block tag status-tag" :class="'status-' + item.status">
-            {{ item.status }}
-          </span>
-          <span class="item-block">
-            <el-button size="small" type="primary" @click="handleDetail(item)">
-              详情
-            </el-button>
-          </span>
-        </div>
-      </div>
-    </div>
+
+
+    <!-- 表格 -->
+    <el-table :data="filteredList" style="width: 100%" border stripe highlight-current-row>
+      <el-table-column prop="nodeId" label="ID" min-width="100" />
+      <el-table-column prop="nickname" label="节点昵称" min-width="150" />
+      <el-table-column prop="ipAddress" label="IP地址" min-width="150" />
+      <!-- <el-tabel-column prop="cloudProvider" label="云服务商" min-width="120" /> -->
+      <el-table-column label="角色" min-width="120">
+        <template #default="{ row }">
+          <el-tag :type="getRoleTagType(row.role)" effect="dark">
+            {{ row.role }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" min-width="120">
+        <template #default="{ row }">
+          <el-tag :type="getStatusTagType(row.status)" effect="dark">
+            {{ row.status }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      
+      <el-table-column label="" min-width="100" align="center">
+        <template #default="{ row }">
+          <el-button size="small" type="primary" @click="handleDetail(row)">
+            详情
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
   </div>
 </template>
-
-
-
 
 <script setup>
 import { ref, computed, toRef } from 'vue';
 import { useRouter } from 'vue-router';
+import { Search } from '@element-plus/icons-vue';
 
 // 接收父组件传入的数据
 const props = defineProps({
@@ -111,147 +76,87 @@ const selectedStatus = ref('');
 // 角色和状态选项
 const roleOptions = ['CLIENT', 'VPS_RELAY', 'VPS_TE'];
 const statusOptions = ['ONLINE', 'OFFLINE', 'DESTROYING'];
+const searchKeyword = ref('');
 
 // 计算筛选后的列表
 const filteredList = computed(() => {
   return internalList.value.filter(item => {
     const matchRole = selectedRole.value ? item.role === selectedRole.value : true;
     const matchStatus = selectedStatus.value ? item.status === selectedStatus.value : true;
-    return matchRole && matchStatus;
+
+    const keyword = searchKeyword.value.trim().toLowerCase();
+    const matchKeyword = keyword
+      ? (String(item.id).toLowerCase().includes(keyword) ||
+        (item.name && item.name.toLowerCase().includes(keyword)) ||
+        (item.ipaddress && item.ipaddress.toLowerCase().includes(keyword)))
+      : true;
+
+    return matchRole && matchStatus && matchKeyword;
   });
 });
 
-// 点击详情按钮，直接跳转
+
+// 点击详情按钮，跳转
 const handleDetail = (item) => {
   router.push(`/node/${item.id}`);
+};
+
+// 根据角色返回不同的tag样式
+const getRoleTagType = (role) => {
+  switch (role) {
+    case 'VPS_TE':
+      return 'primary';
+    case 'VPS_RELAY':
+      return 'success';
+    case 'CLIENT':
+      return 'warning';
+    default:
+      return 'info';
+  }
+};
+
+// 根据状态返回不同的tag样式
+const getStatusTagType = (status) => {
+  switch (status) {
+    case 'ONLINE':
+      return 'success';
+    case 'OFFLINE':
+      return 'warning';
+    case 'DESTROYING':
+      return 'danger';
+    default:
+      return 'info';
+  }
 };
 </script>
 
 <style scoped>
-.list-header {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr auto;
-  gap: 12px;
-  padding: 4px 20px;
-  background-color: #ffffff;
-  font-weight: bold;
-  color: #333;
-  border-bottom: 1px solid #dce3ee;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 粘性滚动时更柔和的阴影 */
-  backdrop-filter: blur(4px); /* 可选，让顶部略微有磨砂质感 */
-  transition: all 0.3s ease;
-}
-
-/* 每列内部布局 */
-.header-cell {
+.filter-bar {
   display: flex;
-  flex-direction: column;
-  align-items: left;
-  gap: 4px; /* 标题和筛选框之间的间距 */
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 0 0 10px 0;
 }
 
-/* 占位用，不筛选的地方 */
-.filter-placeholder {
-  height: 36px; /* el-select 统一高度 */
+.filter-item {
+  width: 200px;
+  /* 筛选框变宽 */
 }
 
-/* 筛选器统一样式 */
-.filter-select {
-  width: 120px;
-  font-size: 14px; /* 和标题基本匹配 */
-  height: 36px;
-}
-
-/* 让 el-select 里面的内容高度也适配 */
-.filter-select .el-input__inner {
-  height: 36px;
-  line-height: 36px;
-  font-size: 14px;
-}
-
-.scroll-container {
+.search-input {
   flex: 1;
-  overflow-y: auto;
-  padding: 12px 20px;
-  background-color: #f5f7fa; /* 很浅的灰色，看着清爽 */
+  /* 搜索框自动拉伸占满空白 */
+  min-width: 240px;
+  max-width: 400px;
 }
 
-
-
-.list-item {
-  width: 100%;
-  padding: 16px 20px;
-  margin-bottom: 12px;
-  background-color: #f9fbff;
-  border-radius: 10px;
+.el-table {
   font-size: 16px;
-  font-weight: 500;
-  color: #333;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
 
-.item-header {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr auto;
-  gap: 12px;
-  align-items: center;
-  padding-right: 8px;
+/* 优化 Tag 样式，可以让字体大一点更协调 */
+.el-tag {
+  font-size: 13px;
+  padding: 4px 8px;
 }
-
-.item-block {
-  flex-shrink: 0;
-  text-align: left;
-  padding: 0 4px;
-}
-
-.item-block:last-child {
-  flex: none;
-  text-align: right;
-}
-
-.item-name {
-  flex: 1;
-}
-
-.tag {
-  display: inline-block;
-  max-width: 120px;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 14px;
-  color: white;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* 角色颜色 */
-.role-VPS_TE {
-  background-color: #1976d2;
-}
-
-.role-VPS_RELAY {
-  background-color: #7b1fa2;
-}
-
-.role-CLIENT {
-  background-color: #1f9ba2;
-}
-
-/* 状态颜色 */
-.status-ONLINE {
-  background-color: #2e7d32;
-}
-
-.status-OFFLINE {
-  background-color: #ef6c00;
-}
-
-.status-DESTROYING {
-  background-color: #c62828;
-}
-
 </style>

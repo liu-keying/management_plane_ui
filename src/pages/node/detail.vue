@@ -1,5 +1,6 @@
 <template>
   <div class="node-detail">
+
     <MapView :points="points" :lineConnections="[]" />
     <el-card :body-style="{ padding: '20px' }" class="detail-card">
       <!-- <h2 class="title">节点详细信息</h2> -->
@@ -33,15 +34,15 @@
               <span>{{ node.cpuUsage }}%</span>
             </div>
             <div class="info-item">
-              <span class="label">内存使用:</span>
+              <span class="label">内存使用率:</span>
               <span>{{ node.memoryUsage }}%</span>
             </div>
             <div class="info-item">
-              <span class="label">流量(进):</span>
+              <span class="label">流入流量:</span>
               <span>{{ formatTraffic(node.trafficIn) }}</span>
             </div>
             <div class="info-item">
-              <span class="label">流量(出):</span>
+              <span class="label">流出流量:</span>
               <span>{{ formatTraffic(node.trafficOut) }}</span>
             </div>
           </el-col>
@@ -92,8 +93,9 @@
       <!-- 按钮区域 -->
       <div class="action-buttons">
         <el-button type="primary" @click="openDialog('createRelay')">创建 RELAY</el-button>
-        <el-button type="warning" @click="openDialog('updateNode')">更新节点</el-button>
+        <el-button type="warning" @click="openDialog('updateNode')">更新节点信息</el-button>
         <el-button type="danger" @click="openDialog('destroyNode')">销毁节点</el-button>
+        <el-button type="primary" @click="goBack" class="back-button">返回节点列表</el-button>
       </div>
     </el-card>
     <!-- 弹窗 -->
@@ -136,12 +138,17 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { ElButton, ElDialog, ElTag, ElRow, ElCol, ElCard } from 'element-plus';
 import { ElMessage } from 'element-plus';
 
-
 import MapView from '@/components/MapView.vue';
+
+const router = useRouter();
+
+const goBack = () => {
+  router.push('/node'); 
+};
 
 
 // 弹窗控制
@@ -182,39 +189,33 @@ const openDialog = (action) => {
 
 // 点击确认按钮
 const confirmAction = async () => {
-  dialogVisible.value = false;
-
   try {
     if (currentAction.value === 'createRelay') {
       console.log('创建 RELAY', node.value);
       // TODO: 调用创建 RELAY 的 API
-      // await apiCreateRelay(node.value.nodeId);
-
       ElMessage.success('RELAY 创建成功');
     } else if (currentAction.value === 'updateNode') {
       console.log('更新节点，新的数据：', editForm.value);
-      // TODO: 调用更新节点的 API
-      // await apiUpdateNode(editForm.value);
-
-      // 同步本地 node
-      node.value.nodeId = editForm.value.nodeId;
+      node.value.id = editForm.value.nodeId;
       node.value.nickname = editForm.value.nickname;
       node.value.role = editForm.value.role;
       node.value.status = editForm.value.status;
-
+      // TODO: 调用更新节点的 API
       ElMessage.success('节点更新成功');
     } else if (currentAction.value === 'destroyNode') {
       console.log('销毁节点', node.value);
       // TODO: 调用销毁节点的 API
-      // await apiDestroyNode(node.value.nodeId);
-
       ElMessage.success('节点销毁成功');
     }
+
+    dialogVisible.value = false; // ✅ 成功后自动关闭弹窗
+    await fetchNodeDetail();     // ✅ 成功后刷新节点数据
   } catch (error) {
     console.error('操作失败', error);
     ElMessage.error('操作失败，请重试');
   }
 };
+
 
 
 
@@ -316,12 +317,15 @@ onMounted(() => {
 <style scoped>
 .node-detail {
   padding: 20px;
+
 }
 
 .detail-card {
   background-color: #f9f9f9;
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  max-width: 1200px;
+  margin: 40px auto;
 }
 
 .title {
@@ -357,11 +361,31 @@ onMounted(() => {
 
 .action-buttons {
   margin-top: 20px;
-  text-align: right;
+  text-align: center;
 }
 
 .action-buttons .el-button {
   margin-left: 10px;
 }
 
+.back-button {
+  /* margin-bottom: 20px;*/
+  margin-left: 10px;
+  background-color: #ffffff;
+  /* border: 1px solid #dcdfe6; */
+  color: #409eff;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #ecf5ff;
+  border-color: #c6e2ff;
+  color: #409eff;
+}
+
+.back-button:active {
+  background-color: #d9ecff;
+  border-color: #a0cfff;
+  color: #337ecc;
+}
 </style>

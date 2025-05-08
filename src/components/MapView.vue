@@ -1,15 +1,32 @@
 <template>
   <div>
-    <div id="worldgraph"></div>
+    <div ref="chartRef" id="worldgraph"></div>
 
     <!-- 弹窗 -->
     <el-dialog v-model="dialogVisible" width="30%">
       <div v-if="tooltipData.type === 'point'" class="dialog-content">
-        <p><span class="label">节点名称:</span> {{ tooltipData.data.name }}</p>
-        <p><span class="label">IP地址:</span> {{ tooltipData.data.ipaddress }}</p>
+        <p><span class="label">节点 ID:</span> {{ tooltipData.data.nodeId }}</p>
+        <p><span class="label">节点昵称:</span> {{ tooltipData.data.nickname }}</p>
+        <p><span class="label">指纹:</span> {{ tooltipData.data.fingerprint }}</p>
+        <p><span class="label">IP 地址:</span> {{ tooltipData.data.ipAddress }}</p>
         <p><span class="label">角色:</span> {{ tooltipData.data.role }}</p>
         <p><span class="label">状态:</span> {{ tooltipData.data.status }}</p>
+        <p><span class="label">风险等级:</span> {{ tooltipData.data.riskLevel }}</p>
+
+        <p><span class="label">CPU 使用率:</span> {{ tooltipData.data.cpuUsage }}%</p>
+        <p><span class="label">内存使用率:</span> {{ tooltipData.data.memoryUsage }}%</p>
+
+        <p><span class="label">流入流量:</span> {{ formatBytes(tooltipData.data.trafficIn) }}</p>
+        <p><span class="label">流出流量:</span> {{ formatBytes(tooltipData.data.trafficOut) }}</p>
+
+        <p><span class="label">地理位置:</span> {{ tooltipData.data.geoLocation }}</p>
+        <p><span class="label">云服务商:</span> {{ tooltipData.data.cloudProvider }}</p>
+
+        <p><span class="label">创建时间:</span> {{ formatDate(tooltipData.data.createdAt) }}</p>
+        <p><span class="label">创建人:</span> {{ tooltipData.data.createdBy }}</p>
+        <p><span class="label">最近心跳:</span> {{ formatDate(tooltipData.data.lastHeartbeat) }}</p>
       </div>
+
       <div v-else-if="tooltipData.type === 'line'" class="dialog-content">
         <p><span class="label">连接:</span> {{ tooltipData.from.name }} → {{ tooltipData.to.name }}</p>
         <p><span class="label">源 IP:</span> {{ tooltipData.from.ipaddress }}</p>
@@ -28,21 +45,18 @@
 
 <script setup>
 import * as echarts from 'echarts';
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import worldData from '@/assets/json/world.json';
+import { formatBytes, formatDate } from '@/utils/formatters';
 
-// ✅ 接收 props
+// props 和 emit
 const props = defineProps({
-  points: {
-    type: Array,
-    required: true
-  },
-  lineConnections: {
-    type: Array,
-    required: true
-  }
+  points: { type: Array, required: true },
+  lineConnections: { type: Array, default: () => [] },
+  selectedNodeIds: { type: Array, default: () => [] }
 });
+const emit = defineEmits(['selectPoint']);
 
 const router = useRouter();
 
@@ -50,37 +64,77 @@ const dialogVisible = ref(false);
 const tooltipData = ref({});
 
 const worldGraph = ref(null);
+const chartRef = ref(null);
 let mapRegistered = false;
-let resizeHandler = null;
+let observer = null;
 
-// ✅ 根据 props 动态生成线数据
 const lines = ref([]);
 
-const goToNodeDetail = (id) => {
-  router.push(`/node/${id}`);
+const goToNodeDetail = (nodeId) => {
+  router.push(`/node/${nodeId}`);
 };
 
-const goToLinkDetail = (id) => {
-  router.push(`/link/${id}`);
+const goToLinkDetail = (linkId) => {
+  router.push(`/link/${linkId}`);
 };
 
 const handleDetailClick = () => {
   if (tooltipData.value.type === 'point') {
-    goToNodeDetail(tooltipData.value.data.id);
+    goToNodeDetail(tooltipData.value.data.nodeId);
   } else if (tooltipData.value.type === 'line') {
-    goToLinkDetail(tooltipData.value.id);
+    goToLinkDetail(tooltipData.value.linkId);
   }
 };
 
 const initChart = () => {
-  if (!document.getElementById('worldgraph')) return;
+  if (!chartRef.value) return;
 
   if (!mapRegistered) {
     echarts.registerMap('world', worldData);
     mapRegistered = true;
   }
 
-  worldGraph.value = echarts.init(document.getElementById('worldgraph'));
+  worldGraph.value = echarts.init(chartRef.value);
+  setChartOption();
+
+  worldGraph.value.on('click', (params) => {
+    if (params.seriesType === 'scatter' && params.data) {
+      emit('selectPoint', params.data);
+      tooltipData.value = { type: 'point', data: params.data };
+      dialogVisible.value = true;
+    } else if (params.seriesType === 'lines' && params.data) {
+      tooltipData.value = {
+        type: 'line',
+        from: params.data.from,
+        to: params.data.to,
+        linkId: params.data.linkId
+      };
+      dialogVisible.value = true;
+    }
+  });
+};
+
+const setChartOption = () => {
+  if (!worldGraph.value) return;
+
+  const normalPoints = props.points.map(p => ({
+    ...p,
+    itemStyle: {
+      color: props.selectedNodeIds.includes(p.nodeId) ? '#00C853' : '#FF6F61'
+    }
+  }));
+
+  const selectedPoints = props.points.filter(p => props.selectedNodeIds.includes(p.nodeId));
+  const selectedLines = [];
+  for (let i = 0; i < selectedPoints.length; i++) {
+    for (let j = i + 1; j < selectedPoints.length; j++) {
+      selectedLines.push({
+        coords: [selectedPoints[i].value, selectedPoints[j].value],
+        from: selectedPoints[i],
+        to: selectedPoints[j]
+      });
+    }
+  }
 
   const option = {
     geo: {
@@ -105,12 +159,12 @@ const initChart = () => {
       enterable: false,
       formatter: function (params) {
         if (params.seriesType === 'scatter') {
-          return `<strong>节点:</strong> ${params.data.name}`;
+          return `<strong>节点</strong> ${params.data.nodeId}`;
         }
         if (params.seriesType === 'lines') {
           const from = params.data.from?.name || '未知';
           const to = params.data.to?.name || '未知';
-          return `<strong>链路:</strong> ${from} → ${to}`;
+          return `<strong>链路</strong> ${params.data.linkId}`;
         }
         return '';
       }
@@ -121,8 +175,7 @@ const initChart = () => {
         type: 'scatter',
         coordinateSystem: 'geo',
         symbolSize: 10,
-        itemStyle: { color: '#FF6F61' },
-        data: props.points
+        data: normalPoints
       },
       {
         name: 'Connections',
@@ -141,55 +194,39 @@ const initChart = () => {
           curveness: 0
         },
         data: lines.value
+      },
+      {
+        name: 'SelectedLines',
+        type: 'lines',
+        coordinateSystem: 'geo',
+        lineStyle: {
+          color: '#00C853',
+          width: 2,
+          opacity: 0.9
+        },
+        data: selectedLines
       }
     ]
   };
 
-  worldGraph.value.setOption(option);
+  worldGraph.value.setOption(option, true);
+};
 
-  worldGraph.value.on('click', (params) => {
-    if (params.seriesType === 'scatter' && params.data) {
-      tooltipData.value = {
-        type: 'point',
-        data: params.data
-      };
-      dialogVisible.value = true;
-    } else if (params.seriesType === 'lines' && params.data) {
-      tooltipData.value = {
-        type: 'line',
-        from: params.data.from,
-        to: params.data.to,
-        id: params.data.id
-      };
-      dialogVisible.value = true;
+const resizeChart = () => {
+  nextTick(() => {
+    if (worldGraph.value) {
+      worldGraph.value.resize();
     }
   });
 };
 
-onMounted(() => {
-  // 先生成 lines 数据
-  generateLines();
-  initChart();
-
-  resizeHandler = () => {
-    if (worldGraph.value) worldGraph.value.resize();
-  };
-  window.addEventListener('resize', resizeHandler);
-});
-
-onUnmounted(() => {
-  if (worldGraph.value) worldGraph.value.dispose();
-  window.removeEventListener('resize', resizeHandler);
-});
-
-// ✅ 根据传入的 points 和 lineConnections 自动算 lines
 const generateLines = () => {
   lines.value = props.lineConnections.map(([fromId, toId], index) => {
-    const from = props.points.find(p => p.id === fromId);
-    const to = props.points.find(p => p.id === toId);
+    const from = props.points.find(p => p.nodeId === fromId);
+    const to = props.points.find(p => p.nodeId === toId);
     if (from && to) {
       return {
-        id: index + 1,
+        linkId: index + 1,
         from,
         to,
         coords: [from.value, to.value]
@@ -198,14 +235,38 @@ const generateLines = () => {
   }).filter(Boolean);
 };
 
-// ✅ 监听传入的数据变化（比如父组件动态更新 points / lines）
-watch(() => [props.points, props.lineConnections], () => {
-  if (worldGraph.value) {
-    generateLines();
-    initChart();
+onMounted(async () => {
+  generateLines();
+  await nextTick();
+  initChart();
+
+  observer = new ResizeObserver(() => {
+    resizeChart();
+  });
+  if (chartRef.value) {
+    observer.observe(chartRef.value);
   }
 });
+
+onUnmounted(() => {
+  if (worldGraph.value) worldGraph.value.dispose();
+  if (observer && chartRef.value) observer.unobserve(chartRef.value);
+});
+
+// 父组件变化，刷新图表
+watch(
+  () => [props.points, props.lineConnections, props.selectedNodeIds],
+  () => {
+    if (worldGraph.value) {
+      generateLines();
+      setChartOption();
+    }
+  },
+  { deep: true }
+);
 </script>
+
+
 
 <style scoped>
 #worldgraph {

@@ -16,47 +16,77 @@
         router
       >
         <el-menu-item index="/">首页</el-menu-item>
-        <el-menu-item index="/node">节点信息</el-menu-item>
-        <el-menu-item index="/link">链路信息</el-menu-item>
+        <el-menu-item index="/node">节点管理</el-menu-item>
+        <el-menu-item index="/link">链路管理</el-menu-item>
         <el-menu-item index="/alert">故障告警</el-menu-item>
         <el-menu-item index="/situation">态势感知</el-menu-item>
         <el-menu-item index="/users">用户管理</el-menu-item>
       </el-menu>
 
-      <!-- <div class="navbar-right">
-        <el-button type="primary" size="small">登录</el-button>
-      </div> -->
+      <!-- 登录/用户名显示区域 -->
+      <div class="navbar-right">
+        <el-button
+          v-if="!user"
+          type="primary"
+          size="medium"
+          @click="goToLogin"
+          class="login-btn-nav"
+        >
+          登录
+        </el-button>
+
+        <el-dropdown v-else>
+          <span class="el-dropdown-link">
+            {{ user.username }}
+            <el-icon><arrow-down /></el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
     </el-header>
 
     <el-main>
       <router-view />
     </el-main>
+    <LoginDialog ref="loginDialogRef" />
   </el-container>
 </template>
 
+
 <script setup>
-import { useRoute } from 'vue-router';
-import { computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { ref, computed } from 'vue';
+import { ArrowDown } from '@element-plus/icons-vue';
+import LoginDialog from './components/login.vue';
+import { useAuth} from '@/composables/useAuth'
+
+const { user, logout } = useAuth();
+const loginDialogRef = ref();
+// 登录按钮跳转
+const goToLogin = () => {
+  loginDialogRef.value?.open();
+};
+
 
 const route = useRoute();
+const router = useRouter();
 
-// 计算当前活跃的菜单项
+// 当前激活菜单
 const activeMenu = computed(() => {
-  // 判断当前路径，并返回对应的菜单栏
-  if (route.path.startsWith('/node')) {
-    return '/node';
-  } else if (route.path.startsWith('/link')) {
-    return '/link';
-  } else if (route.path.startsWith('/alert')) {
-    return '/alert';
-  } else if (route.path.startsWith('/situation')) {
-    return '/situation';
-  } else if (route.path.startsWith('/users')) {
-    return '/users';
-  } else {
-    return '/'; // 默认为首页
-  }
+  if (route.path.startsWith('/node')) return '/node';
+  if (route.path.startsWith('/link')) return '/link';
+  if (route.path.startsWith('/alert')) return '/alert';
+  if (route.path.startsWith('/situation')) return '/situation';
+  if (route.path.startsWith('/users')) return '/users';
+  return '/';
 });
+
+
+
 </script>
 
 <style scoped>
@@ -106,6 +136,28 @@ const activeMenu = computed(() => {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-right: 20px;
+  color: white;
 }
+
+.el-dropdown-link {
+  cursor: pointer;
+  color: white;
+  font-size: 16px;
+  user-select: none;
+}
+
+.login-btn-nav {
+  font-size: 18px;
+  height: 36px;
+  padding: 0 20px;
+  color:#1976d2;
+  border-radius: 4px;
+  border: none;
+  background-color: white;
+  transition: background-color 0.3s ease;
+}
+
+
 
 </style>

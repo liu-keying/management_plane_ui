@@ -9,12 +9,18 @@ import LinkDetail from '@/pages/link/detail.vue';
 import LinkCreate from '@/pages/link/create.vue';
 import LinkUpdate from '@/pages/link/update.vue';
 import AlertPage from '@/pages/alert/index.vue';
+import LoginPage from '@/pages/home/login.vue';
 
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: HomePage,
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: LoginPage,
   },
   {
     path: '/node',
