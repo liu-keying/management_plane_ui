@@ -1,132 +1,140 @@
 <template>
-    <div class="scroll-container">
-      <div v-for="(item, index) in internalList" :key="index" class="list-item">
-        <div class="item-header">
-          <span class="item-block item-name">{{ item.from }} -> {{ item.to }}</span>
-          <span class="item-block tag role-tag" :class="'policy-' + item.policy">
-            {{ item.policy }}
-          </span>
-          <span class="item-block tag status-tag" :class="'status-' + item.status">
-            {{ item.status }}
-          </span>
-          <span class="item-block">
-            <el-button size="small" type="primary" @click="goToDetail(item.id)">
-              详情
-            </el-button>
-          </span>
-        </div>
-      </div>
+  <div>
+    <!-- 筛选器 -->
+    <div class="filter-bar">
+      <el-input v-model="searchKeyword" placeholder="搜索 节点/状态/策略" clearable class="filter-item search-input">
+        <template #prefix>
+          <el-icon><Search /></el-icon>
+        </template>
+      </el-input>
+
+      <el-select v-model="selectedStatus" placeholder="选择状态" clearable class="filter-item">
+        <el-option v-for="status in statusOptions" :key="status" :label="status" :value="status" />
+      </el-select>
+
+      <el-select v-model="selectedPolicy" placeholder="选择策略" clearable class="filter-item">
+        <el-option v-for="policy in policyOptions" :key="policy" :label="policy" :value="policy" />
+      </el-select>
     </div>
-  </template>
-  
-  
-  <script setup>
-  import { ref, onMounted } from 'vue';
-  import { useRouter } from 'vue-router';
-  
-  const internalList = ref([]);
-  const router = useRouter();
-  
-  onMounted(() => {
-    internalList.value = [
-      { id: 1, from: '节点 A', to: '节点 B', status: 'ACTIVE', policy: 'RANDOM'},
-      { id: 2, from: '节点 C', to: '节点 D', status: 'INACTIVE', policy: 'RANDOM'},
-      { id: 3, from: '节点 E', to: '节点 F', status: 'PENDING', policy: 'RECOMMEND'},
-      { id: 4, from: '节点 G', to: '节点 H', status: 'INACTIVE', policy: 'SPECIFIED'},
-      { id: 5, from: '节点 I', to: '节点 J', status: 'ACTIVE', policy: 'RANDOM'},
-      
-    ];
+
+    <!-- 表格展示 -->
+    <el-table :data="filteredList" style="width: 100%" border stripe highlight-current-row>
+      <el-table-column prop="from" label="起始节点" min-width="160" />
+      <el-table-column prop="to" label="目标节点" min-width="160" />
+      <el-table-column label="策略" min-width="120">
+        <template #default="{ row }">
+          <el-tag :type="getPolicyTagType(row.policy)" effect="dark">{{ row.policy }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" min-width="120">
+        <template #default="{ row }">
+          <el-tag :type="getStatusTagType(row.status)" effect="dark">{{ row.status }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="" min-width="100" align="center">
+        <template #default="{ row }">
+          <el-button size="small" type="primary" @click="goToDetail(row.id)">详情</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { Search } from '@element-plus/icons-vue';
+
+const router = useRouter();
+
+// 模拟链路数据
+const internalList = ref([]);
+
+onMounted(() => {
+  internalList.value = [
+    { id: 1, from: '节点1', to: '节点2', status: 'ACTIVE', policy: 'RANDOM' },
+    { id: 2, from: '节点5', to: '节点3', status: 'INACTIVE', policy: 'RANDOM' },
+    { id: 3, from: '节点5', to: '节点7', status: 'PENDING', policy: 'RECOMMEND' },
+    { id: 4, from: '节点3', to: '节点6', status: 'INACTIVE', policy: 'SPECIFIED' },
+    { id: 5, from: '节点5', to: '节点1', status: 'ACTIVE', policy: 'RANDOM' }
+  ];
+});
+
+// 筛选项
+const selectedStatus = ref('');
+const selectedPolicy = ref('');
+const searchKeyword = ref('');
+
+const statusOptions = ['ACTIVE', 'INACTIVE', 'PENDING'];
+const policyOptions = ['RANDOM', 'RECOMMEND', 'SPECIFIED'];
+
+// 筛选逻辑
+const filteredList = computed(() => {
+  return internalList.value.filter(item => {
+    const keyword = searchKeyword.value.trim().toLowerCase();
+    const matchKeyword = keyword
+      ? item.from.toLowerCase().includes(keyword) ||
+        item.to.toLowerCase().includes(keyword) ||
+        item.status.toLowerCase().includes(keyword) ||
+        item.policy.toLowerCase().includes(keyword)
+      : true;
+
+    const matchStatus = selectedStatus.value ? item.status === selectedStatus.value : true;
+    const matchPolicy = selectedPolicy.value ? item.policy === selectedPolicy.value : true;
+
+    return matchKeyword && matchStatus && matchPolicy;
   });
-  
-  const goToDetail = (id) => {
-    router.push(`/link/${id}`);
-  };
-  </script>
-  
-  <style scoped>
-  
-  .scroll-container {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px;
+});
+
+// 跳转详情页
+const goToDetail = (id) => {
+  router.push(`/link/${id}`);
+};
+
+// tag 样式
+const getPolicyTagType = (policy) => {
+  switch (policy) {
+    case 'RANDOM': return 'primary';
+    case 'RECOMMEND': return 'success';
+    case 'SPECIFIED': return 'warning';
+    default: return 'info';
   }
-  
-  .list-item {
-    width: 100%; /* 撑满容器宽度 */
-    padding: 16px 20px;
-    margin-bottom: 12px;
-    background-color: #f9fbff;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 500;
-    color: #333;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+};
+
+const getStatusTagType = (status) => {
+  switch (status) {
+    case 'ACTIVE': return 'success';
+    case 'PENDING': return 'warning';
+    case 'INACTIVE': return 'danger';
+    default: return 'info';
   }
-  
-  
-  
-  .item-header {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto;
-    gap: 12px;
-    align-items: center;
-    padding-right: 8px; /* 新增：防止按钮贴边 */
-  }
-  
-  
-  .item-block {
-    flex-shrink: 0; /* 不允许压缩 */
-    text-align: center;
-    padding: 0 4px;
-  }
-  
-  .item-block:last-child {
-    flex: none;
-    text-align: right;
-  }
-  
-  
-  
-  .item-name {
-    flex: 1;
-  }
-  
-  .tag {
-    display: inline-block;
-    max-width: 120px;
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 14px;
-    color: white;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  /* 🎨 角色颜色 */
-  .policy-RANDOM {
-    background-color: #1976d2;
-  }
-  
-  .policy-RECOMMEND {
-    background-color: #7b1fa2;
-  }
-  
-  .policy-SPECIFIED {
-    background-color: #1f9ba2;
-  }
-  
-  /* 🎨 状态颜色 */
-  .status-ACTIVE {
-    background-color: #2e7d32;
-  }
-  
-  .status-PENDING {
-    background-color: #ef6c00;
-  }
-  
-  .status-INACTIVE {
-    background-color: #c62828;
-  }
-  </style>
-  
+};
+</script>
+
+<style scoped>
+.filter-bar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 0 0 10px 0;
+}
+
+.filter-item {
+  width: 200px;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 240px;
+  max-width: 400px;
+}
+
+.el-table {
+  font-size: 16px;
+}
+
+.el-tag {
+  font-size: 13px;
+  padding: 4px 8px;
+}
+</style>

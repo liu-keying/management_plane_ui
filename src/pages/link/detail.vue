@@ -1,6 +1,6 @@
 <template>
   <div class="link-detail">
-    <MapView :points="points" :lineConnections="lineConnections" />
+    <MapView :points="transformedPoints" :lineConnections="lineConnections" />
     <el-card :body-style="{ padding: '20px' }" class="detail-card">
       <div class="detail-info">
         <el-row :gutter="20">
@@ -119,6 +119,7 @@ import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
 import { ElButton, ElDialog, ElTag, ElRow, ElCol, ElCard } from 'element-plus';
 import { ElMessage } from 'element-plus';
+import { computed } from "vue";
 
 import useGlobalConfig from '@/composables/useGlobalConfig';
 import MapView from '@/components/MapView.vue';
@@ -132,7 +133,7 @@ const link = ref(null);
 const mockData = [
   {
     linkId: 1,
-    nodeIds: [1, 2, 3],
+    nodeIds: [1, 2, 3, 4],
     routingPolicy: "RANDOM",
     status: "ACTIVE",
     createdBy: 'admin',
@@ -151,14 +152,94 @@ const mockData = [
 ];
 
 const points = [
-  { id: 1, name: '节点 A', ipaddress: '118.24.56.101', role: 'CLIENT', status: 'ONLINE', value: [116.4, 39.9] },
-  { id: 2, name: '节点 B', ipaddress: '156.234.72.99', role: 'VPS_RELAY', status: 'OFFLINE', value: [120, 30] },
-  { id: 3, name: '节点 C', ipaddress: '103.45.98.12', role: 'VPS_TE', status: 'DESTROYING', value: [104.195, 35.8617] },
-  { id: 4, name: '节点 D', ipaddress: '139.224.8.33', role: 'CLIENT', status: 'ONLINE', value: [-74.006, 40.7128] },
-  { id: 5, name: '节点 E', ipaddress: '120.27.12.55', role: 'CLIENT', status: 'ONLINE', value: [-50.4074, -24.9042] },
-  { id: 6, name: '节点 F', ipaddress: '104.193.88.121', role: 'VPS_RELAY', status: 'DESTROYING', value: [110, 40] },
-  { id: 7, name: '节点 G', ipaddress: '185.220.101.14', role: 'VPS_RELAY', status: 'OFFLINE', value: [120.195, 35.8617] }
+  {
+    nodeId: 1,
+    nickname: 'test1',
+    fingerprint: 'a1b2c3d4e5f6g7h8',
+    ipAddress: '192.168.1.1',
+    role: 'CLIENT',
+    status: 'ONLINE',
+    riskLevel: 2,
+    cpuUsage: 45.5,
+    memoryUsage: 67.2,
+    trafficIn: 1250000,
+    trafficOut: 700000,
+    geoLocation: 'Beijing, China',
+    cloudProvider: 'AWS',
+    createdAt: '2023-01-01T12:00:00',
+    createdBy: 'admin',
+    lastHeartbeat: '2025-04-28T10:30:00',
+    longitude: 116.4,
+    latitude: 39.9
+  },
+  {
+    nodeId: 2,
+    nickname: 'testRelay',
+    fingerprint: 'f1e2d3c4b5a6978g',
+    ipAddress: '192.168.2.2',
+    role: 'VPS_RELAY',
+    status: 'OFFLINE',
+    riskLevel: 3,
+    cpuUsage: 88.1,
+    memoryUsage: 74.6,
+    trafficIn: 2000000,
+    trafficOut: 1200000,
+    geoLocation: 'Shanghai, China',
+    cloudProvider: 'Azure',
+    createdAt: '2023-03-15T08:45:00',
+    createdBy: 'system',
+    lastHeartbeat: '2025-04-27T09:10:00',
+    longitude: 121.5,
+    latitude: 31.2
+  },
+  {
+    nodeId: 3,
+    nickname: 'test3',
+    fingerprint: 'abc123def456ghi789',
+    ipAddress: '10.0.0.3',
+    role: 'VPS_TE',
+    status: 'DESTROYING',
+    riskLevel: 1,
+    cpuUsage: 52.3,
+    memoryUsage: 49.7,
+    trafficIn: 1500000,
+    trafficOut: 850000,
+    geoLocation: 'Guangzhou, China',
+    cloudProvider: 'Tencent Cloud',
+    createdAt: '2022-12-20T14:30:00',
+    createdBy: 'admin',
+    lastHeartbeat: '2025-04-26T14:00:00',
+    longitude: 113.3,
+    latitude: 23.1
+  },
+  {
+    nodeId: 4,
+    nickname: 'test-4',
+    fingerprint: 'xyz987uvw654rst321',
+    ipAddress: '172.16.4.4',
+    role: 'CLIENT',
+    status: 'ONLINE',
+    riskLevel: 0,
+    cpuUsage: 33.0,
+    memoryUsage: 50.0,
+    trafficIn: 500000,
+    trafficOut: 250000,
+    geoLocation: 'New York, USA',
+    cloudProvider: 'AWS',
+    createdAt: '2023-06-10T20:00:00',
+    createdBy: 'admin',
+    lastHeartbeat: '2025-04-28T10:00:00',
+    longitude: -74.006,
+    latitude: 40.7128
+  },
 ];
+const transformedPoints = computed(() => {
+  return points.map(point => ({
+    ...point,
+    value: [point.longitude, point.latitude],
+    id: point.nodeId,
+  }));
+});
 
 const lineConnections = [
   [1, 2],
