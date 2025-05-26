@@ -98,7 +98,7 @@ const filteredList = computed(() => {
 
 // 点击详情按钮，跳转
 const handleDetail = (item) => {
-  router.push(`/node/${item.id}`);
+  router.push(`/node/${item.nodeId}`);
 };
 
 // 根据角色返回不同的tag样式

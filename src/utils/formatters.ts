@@ -19,3 +19,23 @@ export function formatBytes(bytes: number | null | undefined): string {
       second: '2-digit'
     });
   }
+
+  /**
+ * 将对象数组中的所有空值字段统一替换为 "无"
+ * @param {Array<Object>} data 原始数据
+ * @param {String} [placeholder='无'] 占位符，可选
+ * @returns {Array<Object>} 处理后的数据
+ */
+export function replaceEmptyWithPlaceholder(data, placeholder = '无') {
+  return data.map(item => {
+    const newItem = {};
+    for (const key in item) {
+      const value = item[key];
+      newItem[key] =
+        value === null || value === undefined || value.toString().trim() === ''
+          ? placeholder
+          : value;
+    }
+    return newItem;
+  });
+}

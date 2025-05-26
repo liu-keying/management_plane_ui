@@ -120,6 +120,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { ElButton, ElDialog, ElTag, ElRow, ElCol, ElCard } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { computed } from "vue";
+import {formatDate} from "@/utils/formatters.ts";
 
 import useGlobalConfig from '@/composables/useGlobalConfig';
 import MapView from '@/components/MapView.vue';
@@ -338,10 +339,6 @@ const formatPath = (nodes) => {
 };
 
 
-
-const formatDate = (dateTime) => {
-  return dateTime ? new Date(dateTime).toLocaleString() : 'N/A';
-};
 
 const goBack = () => {
   router.push('/link');
