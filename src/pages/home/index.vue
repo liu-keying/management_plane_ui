@@ -96,23 +96,35 @@ const stats = [
   { label: '用户总数', value: 13, type: 'user' },
 ];
 
+type LatLng = {
+  lat: number;
+  lng: number;
+};
+
+const locationMap: Record<string, LatLng> = {
+  "上海": { lat: 31.2304, lng: 121.4737 },
+  "New York": { lat: 40.7128, lng: -74.0060 },
+  "东京": { lat: 35.6762, lng: 139.6503 },
+  "北京": { lat: 39.9042, lng: 116.4074 },
+};
+
 const points = ref([]);
 
 const transformedPoints = computed(() => {
   return points.value.map(point => ({
     ...point,
-    value: [point.longitude, point.latitude],
+    value: locationMap[point.geoLocation],
     id: point.nodeId,
   }));
 });
 
-const lineConnections = [
-  [1, 2],
-  [5, 13],
-  [5, 7],
-  [13, 6],
-  [5, 15]
-];
+//const lineConnections = [
+//  [1, 2],
+//  [5, 13],
+//  [5, 7],
+//  [13, 6],
+//  [5, 15]
+//];
 
 // 获取节点数据
 const fetchNodes = async () => {

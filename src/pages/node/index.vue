@@ -64,108 +64,7 @@ import { useRouter } from 'vue-router';
 import MapView from "@/components/MapView.vue";
 import nodelist from "@/components/nodelist.vue";
 
-const points = [
-  {
-    nodeId: 1,
-    nickname: 'test1',
-    fingerprint: 'a1b2c3d4e5f6g7h8',
-    ipAddress: '192.168.1.1',
-    role: 'CLIENT',
-    status: 'ONLINE',
-    riskLevel: 2,
-    cpuUsage: 45.5,
-    memoryUsage: 67.2,
-    trafficIn: 1250000,
-    trafficOut: 700000,
-    geoLocation: 'Beijing, China',
-    cloudProvider: 'AWS',
-    createdAt: '2023-01-01T12:00:00',
-    createdBy: 'admin',
-    lastHeartbeat: '2025-04-28T10:30:00',
-    longitude: 116.4,
-    latitude: 39.9
-  },
-  {
-    nodeId: 2,
-    nickname: 'testRelay',
-    fingerprint: 'f1e2d3c4b5a6978g',
-    ipAddress: '192.168.2.2',
-    role: 'VPS_RELAY',
-    status: 'OFFLINE',
-    riskLevel: 3,
-    cpuUsage: 88.1,
-    memoryUsage: 74.6,
-    trafficIn: 2000000,
-    trafficOut: 1200000,
-    geoLocation: 'Shanghai, China',
-    cloudProvider: 'Azure',
-    createdAt: '2023-03-15T08:45:00',
-    createdBy: 'system',
-    lastHeartbeat: '2025-04-27T09:10:00',
-    longitude: 121.5,
-    latitude: 31.2
-  },
-  {
-    nodeId: 3,
-    nickname: 'test3',
-    fingerprint: 'abc123def456ghi789',
-    ipAddress: '10.0.0.3',
-    role: 'VPS_TE',
-    status: 'DESTROYING',
-    riskLevel: 1,
-    cpuUsage: 52.3,
-    memoryUsage: 49.7,
-    trafficIn: 1500000,
-    trafficOut: 850000,
-    geoLocation: 'Guangzhou, China',
-    cloudProvider: 'Tencent Cloud',
-    createdAt: '2022-12-20T14:30:00',
-    createdBy: 'admin',
-    lastHeartbeat: '2025-04-26T14:00:00',
-    longitude: 113.3,
-    latitude: 23.1
-  },
-  {
-    nodeId: 4,
-    nickname: 'test-4',
-    fingerprint: 'xyz987uvw654rst321',
-    ipAddress: '172.16.4.4',
-    role: 'CLIENT',
-    status: 'ONLINE',
-    riskLevel: 0,
-    cpuUsage: 33.0,
-    memoryUsage: 50.0,
-    trafficIn: 500000,
-    trafficOut: 250000,
-    geoLocation: 'New York, USA',
-    cloudProvider: 'AWS',
-    createdAt: '2023-06-10T20:00:00',
-    createdBy: 'admin',
-    lastHeartbeat: '2025-04-28T10:00:00',
-    longitude: -74.006,
-    latitude: 40.7128
-  },
-  {
-    nodeId: 5,
-    nickname: 'test5relay',
-    fingerprint: 'mnopqr123456stuv789',
-    ipAddress: '172.31.5.5',
-    role: 'VPS_RELAY',
-    status: 'ONLINE',
-    riskLevel: 2,
-    cpuUsage: 65.5,
-    memoryUsage: 71.2,
-    trafficIn: 1800000,
-    trafficOut: 950000,
-    geoLocation: 'Tokyo, Japan',
-    cloudProvider: 'GCP',
-    createdAt: '2023-05-01T07:20:00',
-    createdBy: 'network-admin',
-    lastHeartbeat: '2025-04-28T09:50:00',
-    longitude: 139.6917,
-    latitude: 35.6895
-  }
-];
+const points = ref([]);
 
 const transformedPoints = computed(() => {
   return points.map(point => ({
@@ -188,23 +87,39 @@ const mockData = [
   { nodeId: 4, nickname: 'Node D', status: 'DESTROYING', role: 'VPS_TE', cloudProvider: 'aws' }
 ];
 
+// const fetchNodes = async () => {
+//   if (useMock.value) {
+//     nodes.value = mockData.filter(node => {
+//       return (
+//         (!filters.value.status || node.status === filters.value.status) &&
+//         (!filters.value.role || node.role === filters.value.role) &&
+//         (!filters.value.cloudProvider || node.cloudProvider === filters.value.cloudProvider)
+//       );
+//     });
+//   } else {
+//     try {
+//       const { status, role, cloudProvider } = filters.value;
+//       const response = await axios.get('/api/nodes', { params: { status, role, cloudProvider } });
+//       nodes.value = response.data;
+//     } catch (error) {
+//       console.error('获取节点失败:', error);
+//     }
+//   }
+// };
+
+// 获取节点数据
 const fetchNodes = async () => {
-  if (useMock.value) {
-    nodes.value = mockData.filter(node => {
-      return (
-        (!filters.value.status || node.status === filters.value.status) &&
-        (!filters.value.role || node.role === filters.value.role) &&
-        (!filters.value.cloudProvider || node.cloudProvider === filters.value.cloudProvider)
-      );
+  try {
+    const response = await axios.get('/api/nodes', {
+      params: {
+        // status: 'ONLINE', // 可选参数，根据需求调整
+        // role: 'CLIENT',  // 可选参数，根据需求调整
+        // cloudProvider: 'AWS' // 可选参数，根据需求调整
+      }
     });
-  } else {
-    try {
-      const { status, role, cloudProvider } = filters.value;
-      const response = await axios.get('/api/nodes', { params: { status, role, cloudProvider } });
-      nodes.value = response.data;
-    } catch (error) {
-      console.error('获取节点失败:', error);
-    }
+    points.value = response.data;
+  } catch (error) {
+    console.error('Failed to fetch nodes:', error);
   }
 };
 
