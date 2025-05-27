@@ -2,7 +2,7 @@
   <div>
     <!-- 筛选器 -->
     <div class="filter-bar">
-      <el-input v-model="searchKeyword" placeholder="搜索 ID / 昵称 / IP地址" clearable class="filter-item search-input">
+      <el-input v-model="searchKeyword" placeholder="搜索 ID / 昵称 / IP地址 / 云服务商" clearable class="filter-item search-input">
         <template #prefix>
           <el-icon>
             <Search />
@@ -23,10 +23,10 @@
 
     <!-- 表格 -->
     <el-table :data="filteredList" style="width: 100%" border stripe highlight-current-row>
-      <el-table-column prop="nodeId" label="ID" min-width="100" />
-      <el-table-column prop="nickname" label="节点昵称" min-width="150"  :formatter="defaultFormatter"/>
-      <el-table-column prop="ipAddress" label="IP地址" min-width="150" :formatter="defaultFormatter" />
-      <el-tabel-column prop="cloudProvider" label="云服务商" min-width="120" :formatter="defaultFormatter"/>
+      <el-table-column prop="nodeId" label="ID" min-width="130" />
+      <el-table-column prop="nickname" label="节点昵称" min-width="100"  :formatter="defaultFormatter"/>
+      <el-table-column prop="ipAddress" label="IP地址" min-width="120" :formatter="defaultFormatter" />
+      <el-table-column prop="cloudProvider" label="云服务商" min-width="100" :formatter="defaultFormatter"/>
       <el-table-column label="角色" min-width="120">
         <template #default="{ row }">
           <el-tag :type="getRoleTagType(row.role)" effect="dark">
@@ -89,7 +89,8 @@ const filteredList = computed(() => {
     const matchKeyword = keyword
       ? (String(item.id).toLowerCase().includes(keyword) ||
         (item.name && item.name.toLowerCase().includes(keyword)) ||
-        (item.ipaddress && item.ipaddress.toLowerCase().includes(keyword)))
+        (item.ipaddress && item.ipaddress.toLowerCase().includes(keyword)) ||
+        (item.cloudProvider && item.cloudProvider.toLowerCase().includes(keyword))) 
       : true;
 
     return matchRole && matchStatus && matchKeyword;
