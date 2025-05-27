@@ -222,39 +222,45 @@ const confirmAction = async () => {
 
 const route = useRoute();
 
-// 模拟数据：根据路由获取节点ID，加载节点详情
-const nodeId = route.params.nodeId; // 假设路由传递了节点ID
+
+const nodeId = route.params.nodeId; // 路由传递节点ID
 
 const node = ref({});
 
 const points = ref([]);
 
 // 模拟从API或数据库获取节点数据
-const fetchNodeDetail = () => {
+const fetchNodeDetail = async () => {
   // 模拟请求数据
-  const mockData = {
-    nodeId: nodeId,
-    nickname: "Node 1",
-    fingerprint: "123456abcdef",
-    ipAddress: "192.168.1.1",
-    role: "CLIENT",
-    status: "ONLINE",
-    riskLevel: 3,
-    cpuUsage: 75.5,
-    memoryUsage: 60,
-    trafficIn: 1000000,
-    trafficOut: 500000,
-    geoLocation: "Beijing, China",
-    cloudProvider: "AWS",
-    createdAt: "2023-01-01T12:00:00",
-    createdBy: "admin",
-    lastHeartbeat: "2023-04-26T15:00:00",
-    longitude: 116.4,
-    latitude: 39.9,
-  };
-
+  // const mockData = {
+  //   nodeId: nodeId,
+  //   nickname: "Node 1",
+  //   fingerprint: "123456abcdef",
+  //   ipAddress: "192.168.1.1",
+  //   role: "CLIENT",
+  //   status: "ONLINE",
+  //   riskLevel: 3,
+  //   cpuUsage: 75.5,
+  //   memoryUsage: 60,
+  //   trafficIn: 1000000,
+  //   trafficOut: 500000,
+  //   geoLocation: "Beijing, China",
+  //   cloudProvider: "AWS",
+  //   createdAt: "2023-01-01T12:00:00",
+  //   createdBy: "admin",
+  //   lastHeartbeat: "2023-04-26T15:00:00",
+  //   longitude: 116.4,
+  //   latitude: 39.9,
+  // };
   // 设置节点数据
-  node.value = mockData;
+  // node.value = mockData;
+
+   try {
+    const response = await axios.get('/api/nodes/'+nodeId, {});
+    node.value = response.data;
+  } catch (error) {
+    console.error('Failed to fetch nodes:', error);
+  }
 
 
   // 更新 points 中的 value

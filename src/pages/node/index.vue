@@ -1,5 +1,5 @@
 <template>
-  <MapView :points="transformedPoints" />
+  <MapView :points="[]"/>
   <!-- <div>
     <button class="create-button" @click="goToCreate">创建节点</button>
   </div> -->
