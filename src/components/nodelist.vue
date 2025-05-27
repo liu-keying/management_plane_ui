@@ -24,9 +24,9 @@
     <!-- 表格 -->
     <el-table :data="filteredList" style="width: 100%" border stripe highlight-current-row>
       <el-table-column prop="nodeId" label="ID" min-width="100" />
-      <el-table-column prop="nickname" label="节点昵称" min-width="150" />
-      <el-table-column prop="ipAddress" label="IP地址" min-width="150" />
-      <!-- <el-tabel-column prop="cloudProvider" label="云服务商" min-width="120" /> -->
+      <el-table-column prop="nickname" label="节点昵称" min-width="150"  :formatter="defaultFormatter"/>
+      <el-table-column prop="ipAddress" label="IP地址" min-width="150" :formatter="defaultFormatter" />
+      <el-tabel-column prop="cloudProvider" label="云服务商" min-width="120" :formatter="defaultFormatter"/>
       <el-table-column label="角色" min-width="120">
         <template #default="{ row }">
           <el-tag :type="getRoleTagType(row.role)" effect="dark">
@@ -57,6 +57,7 @@
 import { ref, computed, toRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { Search } from '@element-plus/icons-vue';
+import { defaultFormatter } from '@/utils/formatters';
 
 // 接收父组件传入的数据
 const props = defineProps({

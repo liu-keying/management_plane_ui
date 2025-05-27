@@ -20,22 +20,21 @@ export function formatBytes(bytes: number | null | undefined): string {
     });
   }
 
-  /**
+/**
  * 将对象数组中的所有空值字段统一替换为 "无"
- * @param {Array<Object>} data 原始数据
- * @param {String} [placeholder='无'] 占位符，可选
- * @returns {Array<Object>} 处理后的数据
+ * @param data 原始数据
+ * @param placeholder 占位符，默认值为 "无"
+ * @returns 处理后的数据
  */
-export function replaceEmptyWithPlaceholder(data, placeholder = '无') {
-  return data.map(item => {
-    const newItem = {};
-    for (const key in item) {
-      const value = item[key];
-      newItem[key] =
-        value === null || value === undefined || value.toString().trim() === ''
-          ? placeholder
-          : value;
-    }
-    return newItem;
-  });
+import type { TableColumnCtx } from 'element-plus';
+
+/**
+ * 默认格式化器：用于 Element Plus 表格列，空值统一显示为 “无”
+ * @param row 当前行数据
+ * @param column 当前列定义
+ * @returns 格式化后的字符串
+ */
+export function defaultFormatter<T = any>(row: T, column: TableColumnCtx<T>): string {
+  const value = row[(column.property as keyof T)];
+  return value?.toString().trim() ? String(value) : '无';
 }

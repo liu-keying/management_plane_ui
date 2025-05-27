@@ -39,11 +39,11 @@
             </div>
             <div class="info-item">
               <span class="label">流入流量:</span>
-              <span>{{ formatTraffic(node.trafficIn) }}</span>
+              <span>{{ formatBytes(node.trafficIn) }}</span>
             </div>
             <div class="info-item">
               <span class="label">流出流量:</span>
-              <span>{{ formatTraffic(node.trafficOut) }}</span>
+              <span>{{ formatBytes(node.trafficOut) }}</span>
             </div>
           </el-col>
 
@@ -141,6 +141,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElButton, ElDialog, ElTag, ElRow, ElCol, ElCard } from 'element-plus';
 import { ElMessage } from 'element-plus';
+import {formatDate, formatBytes} from "@/utils/formatters.ts";
 
 import MapView from '@/components/MapView.vue';
 
@@ -262,23 +263,6 @@ const fetchNodeDetail = () => {
   ];
 };
 
-
-// 格式化日期
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleString();
-};
-
-// 格式化流量
-const formatTraffic = (traffic) => {
-  if (traffic >= 1000000) {
-    return (traffic / 1000000).toFixed(2) + " MB";
-  } else if (traffic >= 1000) {
-    return (traffic / 1000).toFixed(2) + " KB";
-  } else {
-    return traffic + " B";
-  }
-};
 
 // 根据状态返回合适的标签类型
 const statusTagType = (status) => {
