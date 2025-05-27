@@ -14,15 +14,15 @@
             </div>
             <div class="info-item">
               <span class="label">昵称:</span>
-              <span>{{ node.nickname }}</span>
+              <span>{{ node.nickname  || '无' }}</span>
             </div>
             <div class="info-item">
               <span class="label">IP地址:</span>
-              <span>{{ node.ipAddress }}</span>
+              <span>{{ node.ipAddress  || '无'  }}</span>
             </div>
             <div class="info-item">
               <span class="label">指纹:</span>
-              <span>{{ node.fingerprint }}</span>
+              <span>{{ node.fingerprint  || '无'  }}</span>
             </div>
 
           </el-col>
@@ -31,11 +31,11 @@
 
             <div class="info-item">
               <span class="label">CPU使用率:</span>
-              <span>{{ node.cpuUsage }}%</span>
+              <span>{{ formatPercentage(node.cpuUsage) }}%</span>
             </div>
             <div class="info-item">
               <span class="label">内存使用率:</span>
-              <span>{{ node.memoryUsage }}%</span>
+              <span>{{ formatPercentage(node.memoryUsage) }}%</span>
             </div>
             <div class="info-item">
               <span class="label">流入流量:</span>
@@ -81,7 +81,7 @@
             </div>
             <div class="info-item">
               <span class="label">创建人:</span>
-              <span>{{ node.createdBy }}</span>
+              <span>{{ node.createdBy  || '无' }}</span>
             </div>
             <div class="info-item">
               <span class="label">最后心跳:</span>
@@ -138,6 +138,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
 import { ElButton, ElDialog, ElTag, ElRow, ElCol, ElCard } from 'element-plus';
 import { ElMessage } from 'element-plus';
@@ -269,6 +270,11 @@ const fetchNodeDetail = async () => {
   ];
 };
 
+const formatPercentage = (value)=> {
+  const num = Number(value);
+  if (isNaN(num)) return '无';
+  return `${num.toFixed(2)}%`;
+};
 
 // 根据状态返回合适的标签类型
 const statusTagType = (status) => {
