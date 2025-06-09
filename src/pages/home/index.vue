@@ -88,12 +88,12 @@ import userlist from "@/components/userlist.vue";
 import Situation from "@/components/situationlist.vue";
 
 const stats = [
-  { label: '活跃节点', value: 12, type: 'active' },
-  { label: '节点总数', value: 15, type: 'node' },
-  { label: '活跃链路', value: 2, type: 'active-2' },
-  { label: '链路总数', value: 5, type: 'link' },
-  { label: '故障告警', value: 3, type: 'alert' },
-  { label: '用户总数', value: 13, type: 'user' },
+  { label: '活跃节点', value: 0, type: 'active' },
+  { label: '节点总数', value: 1, type: 'node' },
+  { label: '活跃链路', value: 0, type: 'active-2' },
+  { label: '链路总数', value: 0, type: 'link' },
+  { label: '故障告警', value: 0, type: 'alert' },
+  { label: '用户总数', value: 0, type: 'user' },
 ];
 
 type LatLng = {

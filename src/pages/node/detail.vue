@@ -92,7 +92,7 @@
       </div>
       <!-- 按钮区域 -->
       <div class="action-buttons">
-        <el-button type="primary" @click="openDialog('createRelay')">创建 RELAY</el-button>
+        <el-button type="primary" @click="openDialog('createRelay')">创建中继节点</el-button>
         <el-button type="warning" @click="openDialog('updateNode')">更新节点信息</el-button>
         <el-button type="danger" @click="openDialog('destroyNode')">销毁节点</el-button>
         <el-button type="primary" @click="goBack" class="back-button">返回节点列表</el-button>
@@ -207,7 +207,7 @@ const confirmAction = async () => {
     } else if (currentAction.value === 'destroyNode') {
       console.log('销毁节点', node.value);
       // TODO: 调用销毁节点的 API
-      ElMessage.success('节点销毁成功');
+      //ElMessage.success('节点销毁成功');
     }
 
     dialogVisible.value = false; // ✅ 成功后自动关闭弹窗

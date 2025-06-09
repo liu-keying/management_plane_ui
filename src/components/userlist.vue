@@ -37,11 +37,11 @@
   
   onMounted(() => {
     userList.value = [
-      { userId: 1001, username: 'alice', authenticated: true, active: true },
-      { userId: 1002, username: 'bob', authenticated: false, active: true },
-      { userId: 1003, username: 'charlie', authenticated: true, active: false },
-      { userId: 1004, username: 'diana', authenticated: false, active: false },
-      { userId: 1005, username: 'eve', authenticated: true, active: true }
+      //{ userId: 1001, username: 'alice', authenticated: true, active: true },
+      //{ userId: 1002, username: 'bob', authenticated: false, active: true },
+      //{ userId: 1003, username: 'charlie', authenticated: true, active: false },
+      //{ userId: 1004, username: 'diana', authenticated: false, active: false },
+      //{ userId: 1005, username: 'eve', authenticated: true, active: true }
     ]
   })
   

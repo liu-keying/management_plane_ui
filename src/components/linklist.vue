@@ -49,15 +49,21 @@ const router = useRouter();
 
 // 模拟链路数据
 const internalList = ref([]);
+const fetchLinks = async () => {
+  try {
+    const response = await axios.get('/api/links', {
+      params: {
+
+      }
+    });
+    internalList.value = response.data;
+  } catch (error) {
+    console.error('Failed to fetch links:', error);
+  }
+};
 
 onMounted(() => {
-  internalList.value = [
-    { id: 1, from: '节点1', to: '节点2', status: 'ACTIVE', policy: 'RANDOM' },
-    { id: 2, from: '节点5', to: '节点3', status: 'INACTIVE', policy: 'RANDOM' },
-    { id: 3, from: '节点5', to: '节点7', status: 'PENDING', policy: 'RECOMMEND' },
-    { id: 4, from: '节点3', to: '节点6', status: 'INACTIVE', policy: 'SPECIFIED' },
-    { id: 5, from: '节点5', to: '节点1', status: 'ACTIVE', policy: 'RANDOM' }
-  ];
+fetchLinks();
 });
 
 // 筛选项
