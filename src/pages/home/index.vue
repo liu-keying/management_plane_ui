@@ -2,7 +2,7 @@
   <el-row :gutter="20" class="top-row">
     <el-col :span="18">
       <!-- <el-card class="tall-card"> -->
-      <MapView :points="transformedPoints" :lineConnections="lineConnections"/>
+      <MapView :points="transformedPoints" :lineConnections='[]'/>
       <!-- </el-card> -->
     </el-col>
     <el-col :span="6">
@@ -34,7 +34,7 @@
             <router-link to="/node" class="more-link">更多</router-link>
           </div>
         </template>
-        <nodelist :list="points" />
+        <nodelist :list="nodes" />
       </el-card>
     </el-col>
 
@@ -87,33 +87,57 @@ import alertlist from "@/components/alertlist.vue";
 import userlist from "@/components/userlist.vue";
 import Situation from "@/components/situationlist.vue";
 
-const stats = [
-  { label: '活跃节点', value: 0, type: 'active' },
-  { label: '节点总数', value: 1, type: 'node' },
-  { label: '活跃链路', value: 0, type: 'active-2' },
-  { label: '链路总数', value: 0, type: 'link' },
-  { label: '故障告警', value: 0, type: 'alert' },
-  { label: '用户总数', value: 0, type: 'user' },
-];
+const stats = computed(() => [
+  {
+    label: '活跃节点',
+    value: nodes.value.filter(n => n.status === 'ONLINE').length,
+    type: 'active',
+  },
+  {
+    label: '节点总数',
+    value: nodes.value.length,
+    type: 'node',
+  },
+  {
+    label: '活跃链路',
+    value: links.value.filter(l => l.status === 'ACTIVE').length,
+    type: 'active-2',
+  },
+  {
+    label: '链路总数',
+    value: links.value.length,
+    type: 'link',
+  },
+  {
+    label: '故障告警',
+    value: alerts.value.length,
+    type: 'alert',
+  },
+  {
+    label: '用户总数',
+    value: users.value.length,
+    type: 'user',
+  },
+]);
 
-type LatLng = {
-  lat: number;
-  lng: number;
+
+const locationMap: Record<string, Array<number>> = {
+  "上海": [31.2304, 121.4737],
+  "New York": [40.7128,  -74.0060 ],
+  "东京":[35.6762, 139.6503 ],
+  "北京": [39.9042, 116.4074 ],
 };
 
-const locationMap: Record<string, LatLng> = {
-  "上海": { lat: 31.2304, lng: 121.4737 },
-  "New York": { lat: 40.7128, lng: -74.0060 },
-  "东京": { lat: 35.6762, lng: 139.6503 },
-  "北京": { lat: 39.9042, lng: 116.4074 },
-};
-
-const points = ref([]);
+const nodes = ref([]);
+const links = ref([]);
+const alerts = ref([]);
+const users = ref([]);
 
 const transformedPoints = computed(() => {
-  return points.value.map(point => ({
+  return nodes.value.map(point => ({
     ...point,
-    value: locationMap[point.geoLocation],
+    //value: locationMap[point.geoLocation],
+    value:[39.9042, 116.4074],
     id: point.nodeId,
   }));
 });
@@ -136,7 +160,7 @@ const fetchNodes = async () => {
         // cloudProvider: 'AWS' // 可选参数，根据需求调整
       }
     });
-    points.value = response.data;
+    nodes.value = response.data;
   } catch (error) {
     console.error('Failed to fetch nodes:', error);
   }

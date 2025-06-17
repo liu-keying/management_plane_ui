@@ -193,46 +193,46 @@ const points = [
  //   longitude: 121.5,
  //   latitude: 31.2
  // },
-  {
-    nodeId: 3,
-    nickname: 'test3',
-    fingerprint: 'abc123def456ghi789',
-    ipAddress: '10.0.0.3',
-    role: 'VPS_TE',
-    status: 'DESTROYING',
-    riskLevel: 1,
-    cpuUsage: 52.3,
-    memoryUsage: 49.7,
-    trafficIn: 1500000,
-    trafficOut: 850000,
-    geoLocation: 'Guangzhou, China',
-    cloudProvider: 'Tencent Cloud',
-    createdAt: '2022-12-20T14:30:00',
-    createdBy: 'admin',
-    lastHeartbeat: '2025-04-26T14:00:00',
-    longitude: 113.3,
-    latitude: 23.1
-  },
-  {
-    nodeId: 4,
-    nickname: 'test-4',
-    fingerprint: 'xyz987uvw654rst321',
-    ipAddress: '172.16.4.4',
-    role: 'CLIENT',
-    status: 'ONLINE',
-    riskLevel: 0,
-    cpuUsage: 33.0,
-    memoryUsage: 50.0,
-    trafficIn: 500000,
-    trafficOut: 250000,
-    geoLocation: 'New York, USA',
-    cloudProvider: 'AWS',
-    createdAt: '2023-06-10T20:00:00',
-    createdBy: 'admin',
-    lastHeartbeat: '2025-04-28T10:00:00',
-    longitude: -74.006,
-    latitude: 40.7128
-  },
+  // {
+  //   nodeId: 3,
+  //   nickname: 'test3',
+  //   fingerprint: 'abc123def456ghi789',
+  //   ipAddress: '10.0.0.3',
+  //   role: 'VPS_TE',
+  //   status: 'DESTROYING',
+  //   riskLevel: 1,
+  //   cpuUsage: 52.3,
+  //   memoryUsage: 49.7,
+  //   trafficIn: 1500000,
+  //   trafficOut: 850000,
+  //   geoLocation: 'Guangzhou, China',
+  //   cloudProvider: 'Tencent Cloud',
+  //   createdAt: '2022-12-20T14:30:00',
+  //   createdBy: 'admin',
+  //   lastHeartbeat: '2025-04-26T14:00:00',
+  //   longitude: 113.3,
+  //   latitude: 23.1
+  // },
+  // {
+  //   nodeId: 4,
+  //   nickname: 'test-4',
+  //   fingerprint: 'xyz987uvw654rst321',
+  //   ipAddress: '172.16.4.4',
+  //   role: 'CLIENT',
+  //   status: 'ONLINE',
+  //   riskLevel: 0,
+  //   cpuUsage: 33.0,
+  //   memoryUsage: 50.0,
+  //   trafficIn: 500000,
+  //   trafficOut: 250000,
+  //   geoLocation: 'New York, USA',
+  //   cloudProvider: 'AWS',
+  //   createdAt: '2023-06-10T20:00:00',
+  //   createdBy: 'admin',
+  //   lastHeartbeat: '2025-04-28T10:00:00',
+  //   longitude: -74.006,
+  //   latitude: 40.7128
+  // },
 ];
 const transformedPoints = computed(() => {
   return points.map(point => ({
@@ -249,16 +249,12 @@ const lineConnections = [
 ];
 
 const fetchLinkDetail = async () => {
-  if (useMock.value) {
-    link.value = mockData.find((l) => l.linkId === Number(route.params.linkId)) || null;
-  } else {
     try {
       const response = await axios.get(`/api/links/${route.params.linkId}`);
       link.value = response.data;
     } catch (error) {
       console.error('获取链路详情失败:', error);
     }
-  }
 
 };
 
@@ -306,6 +302,7 @@ const openDialog = (action) => {
 const confirmAction = async () => {
   try {
     if (currentAction.value === 'updateLink') {
+      await updateLink();
       console.log('更新链路，新的数据：', editForm.value);
       link.value.id = editForm.value.id;
       link.value.routingPolicy = editForm.value.routingPolicy;

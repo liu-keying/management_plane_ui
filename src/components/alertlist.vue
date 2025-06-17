@@ -1,19 +1,18 @@
 <template>
-  <div class="scroll-container">
-    <div v-for="(item, index) in internalList" :key="index" class="list-item">
-      <div class="item-header">
-        <span class="item-block item-name">{{ item.name }}</span>
-        <span class="item-block item-name">{{ item.alert }}</span>
-        <span class="item-block tag ugency-tag" :class="'ugency-' + item.ugency">
-          {{ item.ugency }}
-        </span>
-        <span class="item-block">
-          <el-button size="small" type="primary" @click="goToDetail(item.id)">
+  <div>
+    <el-table :data="internalList" style="width: 100%" border stripe highlight-current-row>
+      <el-table-column prop="id" label="ID" min-width="100" />
+      <el-table-column prop="name" label="节点" min-width="150" />
+      <el-table-column prop="ipaddress" label="IP地址" min-width="150" />
+      <el-table-column prop="detail" label="故障描述" min-width="120"/>
+      <el-table-column label="" min-width="100" align="center">
+        <template #default="{ row }">
+          <el-button size="small" type="primary" @click="goToDetail(row.id)">
             详情
           </el-button>
-        </span>
-      </div>
-    </div>
+        </template>
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 
@@ -27,7 +26,7 @@ const router = useRouter();
 
 onMounted(() => {
   internalList.value = [
-    { id: 1, name: '节点 A', alert: '磁盘空间不足', ugency:'HIGH'},
+    //{ id: 1, name: '节点 A', alert: '磁盘空间不足', ugency:'HIGH'},
 
   ];
 });

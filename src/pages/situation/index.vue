@@ -1,5 +1,5 @@
 <template>
-  <alertlist/>
+  <situationlist/>
 </template>
   
   <script setup>
@@ -8,7 +8,7 @@
   import useGlobalConfig from '@/composables/useGlobalConfig';
   import { useRouter } from 'vue-router';
   import MapView from '@/components/MapView.vue';
-  import alertlist from '@/components/alertlist.vue';
+  import situationlist from '@/components/situationlist.vue';
 
   
   </script>

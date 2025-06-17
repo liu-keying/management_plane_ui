@@ -4,56 +4,7 @@
     <button class="create-button" @click="goToCreate">创建节点</button>
   </div> -->
   <nodelist :list="points" />
-  <!-- <div class="container">
-    <div class="header">
-        <h2 class="title">节点列表</h2>
-        <div>
-          <button class="create-button" @click="goToCreate">创建节点</button>
-        </div>
-      </div> -->
 
-  <!-- <table class="node-table">
-      <thead>
-        <tr>
-          <th>节点名称</th>
-          <th>状态
-            <select v-model="filters.status" @change="fetchNodes">
-              <option value="">所有状态</option>
-              <option value="ONLINE">ONLINE</option>
-              <option value="OFFLINE">OFFLINE</option>
-              <option value="DESTROYING">DESTROYING</option>
-            </select>
-          </th>
-          <th>角色
-            <select v-model="filters.role" @change="fetchNodes">
-              <option value="">所有角色</option>
-              <option value="DA">DA</option>
-              <option value="RELAY">RELAY</option>
-            </select>
-          </th>
-          <th>云提供商
-            <select v-model="filters.cloudProvider" @change="fetchNodes">
-              <option value="">所有云提供商</option>
-              <option value="aws">AWS</option>
-              <option value="gcp">GCP</option>
-              <option value="azure">Azure</option>
-            </select>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="node in nodes" :key="node.nodeId" @click="goToNodeDetail(node.nodeId)">
-          <td>{{ node.nickname }}</td>
-          <td>{{ node.status }}</td>
-          <td>{{ node.role }}</td>
-          <td>{{ node.cloudProvider }}</td>
-        </tr>
-        <tr v-if="!nodes.length">
-          <td colspan="4">没有找到符合条件的节点。</td>
-        </tr>
-      </tbody>
-    </table>
-  </div> -->
 </template>
 
 <script setup>

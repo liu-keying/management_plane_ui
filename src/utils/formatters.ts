@@ -20,6 +20,12 @@ export function formatBytes(bytes: number | null | undefined): string {
     });
   }
 
+  export function formatPercentage (value: Number | String): string {
+  const num = Number(value);
+  if (isNaN(num)) return '无';
+  return `${num.toFixed(2)}%`;
+};
+
 /**
  * 将对象数组中的所有空值字段统一替换为 "无"
  * @param data 原始数据

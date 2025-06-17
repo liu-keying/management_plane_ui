@@ -24,18 +24,21 @@
               <span class="label">指纹:</span>
               <span>{{ node.fingerprint  || '无'  }}</span>
             </div>
-
+            <div class="info-item">
+              <span class="label">中继数量:</span>
+              <span>{{ node.relayCount}}</span>
+            </div>
           </el-col>
 
           <el-col :span="6">
 
             <div class="info-item">
               <span class="label">CPU使用率:</span>
-              <span>{{ formatPercentage(node.cpuUsage) }}%</span>
+              <span>{{ formatPercentage(node.cpuUsage) }}</span>
             </div>
             <div class="info-item">
               <span class="label">内存使用率:</span>
-              <span>{{ formatPercentage(node.memoryUsage) }}%</span>
+              <span>{{ formatPercentage(node.memoryUsage) }}</span>
             </div>
             <div class="info-item">
               <span class="label">流入流量:</span>
@@ -44,6 +47,10 @@
             <div class="info-item">
               <span class="label">流出流量:</span>
               <span>{{ formatBytes(node.trafficOut) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">最大中继容量：</span>
+              <span>{{ node.maxRelayCapacity}}</span>
             </div>
           </el-col>
 
@@ -101,25 +108,36 @@
     <!-- 弹窗 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="400px">
       <template v-if="currentAction === 'updateNode'">
-        <el-form :model="editForm" label-width="100px">
-          <el-form-item label="节点ID">
-            <el-input v-model="editForm.nodeId" />
-          </el-form-item>
+        <el-form :model="nodeForm" label-width="100px">>
           <el-form-item label="昵称">
-            <el-input v-model="editForm.nickname" />
+            <el-input v-model="nodeForm.nickname" />
           </el-form-item>
           <el-form-item label="角色">
-            <el-select v-model="editForm.role" placeholder="选择角色">
+            <el-select v-model="nodeForm.role" placeholder="选择角色">
               <el-option label="VPS_TE" value="VPS_TE" />
               <el-option label="VPS_RELAY" value="VPS_RELAY" />
               <el-option label="CLIENT" value="CLIENT" />
             </el-select>
           </el-form-item>
           <el-form-item label="状态">
-            <el-select v-model="editForm.status" placeholder="选择状态">
+            <el-select v-model="nodeForm.status" placeholder="选择状态">
               <el-option label="ONLINE" value="ONLINE" />
               <el-option label="OFFLINE" value="OFFLINE" />
               <el-option label="DESTROYING" value="DESTROYING" />
+            </el-select>
+          </el-form-item>
+        </el-form>
+      </template>
+      <template v-if="currentAction === 'createRelay'">
+        <el-form :model="relayForm" label-width="100px">>
+          <el-form-item label="昵称">
+            <el-input v-model="relayForm.nickname" />
+          </el-form-item>
+          <el-form-item label="中继类型">
+            <el-select v-model="relayForm.type" placeholder="选择类型">
+              <el-option label="ANONYMOUS" value="ANONYMOUS" />
+              <el-option label="ACCESS" value="ACCESS" />
+              <el-option label="UNKNOWN" value="UNKNOWN" />
             </el-select>
           </el-form-item>
         </el-form>
@@ -142,7 +160,7 @@ import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
 import { ElButton, ElDialog, ElTag, ElRow, ElCol, ElCard } from 'element-plus';
 import { ElMessage } from 'element-plus';
-import {formatDate, formatBytes} from "@/utils/formatters.ts";
+import {formatDate, formatBytes, formatPercentage} from "@/utils/formatters.ts";
 
 import MapView from '@/components/MapView.vue';
 
@@ -159,24 +177,27 @@ const dialogTitle = ref('');
 const dialogMessage = ref('');
 const currentAction = ref('');
 
-const editForm = ref({
+const nodeForm = ref({
   nodeId: '',
   nickname: '',
   role: '',
   status: ''
 });
 
+const relayForm = ref({
+  nickname: '',
+  type:''
+});
 
 // 打开弹窗
 const openDialog = (action) => {
   currentAction.value = action;
   if (action === 'createRelay') {
     dialogTitle.value = '创建 RELAY';
-    dialogMessage.value = '确定要在此节点创建 RELAY 吗？';
   } else if (action === 'updateNode') {
     dialogTitle.value = '更新节点';
-    // 填充 editForm
-    editForm.value = {
+    // 填充 nodeForm
+    nodeForm.value = {
       nodeId: node.value.nodeId,
       nickname: node.value.nickname,
       role: node.value.role,
@@ -193,33 +214,87 @@ const openDialog = (action) => {
 const confirmAction = async () => {
   try {
     if (currentAction.value === 'createRelay') {
-      console.log('创建 RELAY', node.value);
-      // TODO: 调用创建 RELAY 的 API
-      ElMessage.success('RELAY 创建成功');
+      await createRelay();
+      await fetchNodeDetail(); // 成功后刷新节点数据
     } else if (currentAction.value === 'updateNode') {
-      console.log('更新节点，新的数据：', editForm.value);
-      node.value.id = editForm.value.nodeId;
-      node.value.nickname = editForm.value.nickname;
-      node.value.role = editForm.value.role;
-      node.value.status = editForm.value.status;
-      // TODO: 调用更新节点的 API
-      ElMessage.success('节点更新成功');
+      await updateNode();
+      await fetchNodeDetail();     // 成功后刷新节点数据
     } else if (currentAction.value === 'destroyNode') {
-      console.log('销毁节点', node.value);
-      // TODO: 调用销毁节点的 API
+      await deleteNode(node.value.nodeId);
+
       //ElMessage.success('节点销毁成功');
     }
-
-    dialogVisible.value = false; // ✅ 成功后自动关闭弹窗
-    await fetchNodeDetail();     // ✅ 成功后刷新节点数据
+    dialogVisible.value = false; // 成功后自动关闭弹窗
   } catch (error) {
     console.error('操作失败', error);
     ElMessage.error('操作失败，请重试');
   }
 };
 
+const createRelay = async () => {
+  console.log('创建中继节点',node.value,relayForm.value);
+  try {
+    const response = await axios.post('/api/nodes', {
+      nickname: relayForm.value.nickname,
+      nodeId: node.value.nodeId,
+      role: node.value.role,
+      status: node.value.status,
+      createdBy: null,//TODO: 传递管理员ID
+      relayType: relayForm.value.type
+    });
 
+    if (response.status === 201) {
+      ElMessage.success('中继节点创建成功');
+    } else {
+      ElMessage.error('中继节点创建失败，请稍后重试');
+    }
+  } catch (error) {
+    console.error('创建中继节点失败：', error);
+    ElMessage.error('中继节点创建失败');
+  }
+};
 
+const updateNode = async () => {
+  console.log('更新节点，新的数据：', nodeForm.value);
+
+  try {
+    const nodeId = nodeForm.value.nodeId;
+    const response = await axios.put(`/api/nodes/${nodeId}`, {
+      nickname: nodeForm.value.nickname,
+      role: nodeForm.value.role,
+      status: nodeForm.value.status,
+      userId: null //TODO: 传递管理员ID
+    });
+
+    if (response.status === 200) {
+      ElMessage.success('节点更新成功');
+    }
+    else {
+      ElMessage.error('节点更新失败，请稍后重试');
+    }
+  } catch (error) {
+    console.error('更新失败：', error);
+    ElMessage.error('节点更新失败');
+  }
+};
+
+const deleteNode = async () => {
+    console.log('销毁节点', node.value);
+    try {
+      const userId = null; //TODO: 传递管理员ID
+      const response = await axios.delete(`/api/nodes/node/${node.value.nodeId}?userId=${userId}`
+      );
+      if (response.status === 200) {
+        ElMessage.success('节点销毁成功');
+        goBack(); // 销毁后返回节点列表
+      } else {
+        ElMessage.error('节点销毁失败，请稍后重试');
+      }
+    } catch (error) {
+      console.error('销毁节点失败：', error);
+      ElMessage.error('节点销毁失败');
+    }
+};
 
 const route = useRoute();
 
@@ -230,32 +305,7 @@ const node = ref({});
 
 const points = ref([]);
 
-// 模拟从API或数据库获取节点数据
 const fetchNodeDetail = async () => {
-  // 模拟请求数据
-  // const mockData = {
-  //   nodeId: nodeId,
-  //   nickname: "Node 1",
-  //   fingerprint: "123456abcdef",
-  //   ipAddress: "192.168.1.1",
-  //   role: "CLIENT",
-  //   status: "ONLINE",
-  //   riskLevel: 3,
-  //   cpuUsage: 75.5,
-  //   memoryUsage: 60,
-  //   trafficIn: 1000000,
-  //   trafficOut: 500000,
-  //   geoLocation: "Beijing, China",
-  //   cloudProvider: "AWS",
-  //   createdAt: "2023-01-01T12:00:00",
-  //   createdBy: "admin",
-  //   lastHeartbeat: "2023-04-26T15:00:00",
-  //   longitude: 116.4,
-  //   latitude: 39.9,
-  // };
-  // 设置节点数据
-  // node.value = mockData;
-
    try {
     const response = await axios.get('/api/nodes/'+nodeId, {});
     node.value = response.data;
@@ -264,17 +314,12 @@ const fetchNodeDetail = async () => {
   }
 
 
-  // 更新 points 中的 value
-  points.value = [
-    { id: nodeId, value: [mockData.longitude, mockData.latitude] }
-  ];
+  // // 更新 points 中的 value
+  // points.value = [
+  //   { id: nodeId, value: [node.value.longitude, node.value.latitude] }
+  // ];
 };
 
-const formatPercentage = (value)=> {
-  const num = Number(value);
-  if (isNaN(num)) return '无';
-  return `${num.toFixed(2)}%`;
-};
 
 // 根据状态返回合适的标签类型
 const statusTagType = (status) => {

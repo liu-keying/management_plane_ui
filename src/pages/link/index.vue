@@ -82,13 +82,6 @@ const lineConnections = [
   ];
   
   const fetchLinks = async () => {
-    if (useMock.value) {
-      links.value = mockData.filter(link => {
-        return (
-          (!filters.value.status || link.status === filters.value.status)
-        );
-      });
-    } else {
       try {
         const { status } = filters.value;
         const response = await axios.get('/api/links', { params: { status } });
@@ -96,7 +89,6 @@ const lineConnections = [
       } catch (error) {
         console.error('获取链路失败:', error);
       }
-    }
   };
   
   const goToLinkDetail = (linkId) => {
