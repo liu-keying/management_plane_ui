@@ -1,0 +1,50 @@
+[
+  {
+    "linkId": "link-001",
+    "relayIds": ["node-003", "node-006", "node-012"],
+    "routingPolicy": "RANDOM",
+    "status": "ACTIVE",
+    "createdBy": "admin",
+    "createdAt": "2025-06-20T10:00:00Z",
+    "updatedAt": "2025-06-27T04:00:00Z",
+    "circuitCount": 5,
+    "totalTraffic": 15800000,
+    "sourceRelayId": "node-003"
+  },
+  {
+    "linkId": "link-002",
+    "relayIds": ["node-008", "node-015", "node-014"],
+    "routingPolicy": "RECOMMEND",
+    "status": "PENDING",
+    "createdBy": "system",
+    "createdAt": "2025-06-25T08:30:00Z",
+    "updatedAt": "2025-06-26T23:55:00Z",
+    "circuitCount": 2,
+    "totalTraffic": 4200000,
+    "sourceRelayId": "node-008"
+  },
+  {
+    "linkId": "link-003",
+    "relayIds": ["node-005", "node-009", "node-002", "node-012"],
+    "routingPolicy": "SPECIFIED",
+    "status": "INACTIVE",
+    "createdBy": "monitor",
+    "createdAt": "2025-06-18T13:15:00Z",
+    "updatedAt": "2025-06-24T21:20:00Z",
+    "circuitCount": 0,
+    "totalTraffic": 0,
+    "sourceRelayId": "node-005"
+  },
+  {
+    "linkId": "link-004",
+    "relayIds": ["node-006", "node-011", "node-014"],
+    "routingPolicy": "RECOMMEND",
+    "status": "ACTIVE",
+    "createdBy": "devops",
+    "createdAt": "2025-06-22T09:45:00Z",
+    "updatedAt": "2025-06-27T03:50:00Z",
+    "circuitCount": 4,
+    "totalTraffic": 8900000,
+    "sourceRelayId": "node-006"
+  }
+]

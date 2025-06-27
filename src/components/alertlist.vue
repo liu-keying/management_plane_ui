@@ -3,8 +3,8 @@
     <el-table :data="internalList" style="width: 100%" border stripe highlight-current-row>
       <el-table-column prop="id" label="ID" min-width="100" />
       <el-table-column prop="name" label="节点" min-width="150" />
-      <el-table-column prop="ipaddress" label="IP地址" min-width="150" />
-      <el-table-column prop="detail" label="故障描述" min-width="120"/>
+      <el-table-column prop="ipAddress" label="IP地址" min-width="150" />
+      <el-table-column prop="alert" label="故障描述" min-width="120"/>
       <el-table-column label="" min-width="100" align="center">
         <template #default="{ row }">
           <el-button size="small" type="primary" @click="goToDetail(row.id)">
@@ -26,7 +26,7 @@ const router = useRouter();
 
 onMounted(() => {
   internalList.value = [
-    //{ id: 1, name: '节点 A', alert: '磁盘空间不足', ugency:'HIGH'},
+    { id: 1, name: '节点 A', ipAddress:"192.168.100.14", alert: '磁盘空间不足', ugency:'HIGH'},
 
   ];
 });
@@ -96,7 +96,15 @@ const goToDetail = (id) => {
   text-overflow: ellipsis;
 }
 
+.el-table {
+  font-size: 16px;
+}
 
+/* 优化 Tag 样式，可以让字体大一点更协调 */
+.el-tag {
+  font-size: 13px;
+  padding: 4px 8px;
+}
 
 /* 🎨 状态颜色 */
 .ugency-LOW {

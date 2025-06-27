@@ -2,7 +2,7 @@
   <el-row :gutter="20" class="top-row">
     <el-col :span="18">
       <!-- <el-card class="tall-card"> -->
-      <MapView :points="transformedPoints" :lineConnections='[]'/>
+      <MapView :points="nodes" :lineConnections='[]' />
       <!-- </el-card> -->
     </el-col>
     <el-col :span="6">
@@ -46,7 +46,7 @@
             <router-link to="/link" class="more-link">更多</router-link>
           </div>
         </template>
-        <linklist />
+        <linklist :list="links" />
       </el-card>
     </el-col>
   </el-row>
@@ -79,18 +79,22 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
-import axios from "axios";
 import MapView from "@/components/MapView.vue";
 import nodelist from "@/components/nodelist.vue";
 import linklist from "@/components/linklist.vue";
 import alertlist from "@/components/alertlist.vue";
 import userlist from "@/components/userlist.vue";
 import Situation from "@/components/situationlist.vue";
+import useGlobalConfig from '@/composables/useGlobalConfig';
+import { fetchNodes, type NodeItem } from '@/api/node'
+import { fetchLinks, type LinkItem} from '@/api/link'
+
+const { useMock } = useGlobalConfig();
 
 const stats = computed(() => [
   {
     label: '活跃节点',
-    value: nodes.value.filter(n => n.status === 'ONLINE').length,
+    value: nodes.value.filter((n: { status: string; }) => n.status === 'ONLINE').length,
     type: 'active',
   },
   {
@@ -100,7 +104,7 @@ const stats = computed(() => [
   },
   {
     label: '活跃链路',
-    value: links.value.filter(l => l.status === 'ACTIVE').length,
+    value: links.value.filter((l: { status: string; }) => l.status === 'ACTIVE').length,
     type: 'active-2',
   },
   {
@@ -121,26 +125,11 @@ const stats = computed(() => [
 ]);
 
 
-const locationMap: Record<string, Array<number>> = {
-  "上海": [31.2304, 121.4737],
-  "New York": [40.7128,  -74.0060 ],
-  "东京":[35.6762, 139.6503 ],
-  "北京": [39.9042, 116.4074 ],
-};
 
-const nodes = ref([]);
-const links = ref([]);
+const nodes = ref<NodeItem[]>([])
+const links = ref<LinkItem[]>([]);
 const alerts = ref([]);
 const users = ref([]);
-
-const transformedPoints = computed(() => {
-  return nodes.value.map(point => ({
-    ...point,
-    //value: locationMap[point.geoLocation],
-    value:[39.9042, 116.4074],
-    id: point.nodeId,
-  }));
-});
 
 //const lineConnections = [
 //  [1, 2],
@@ -150,24 +139,12 @@ const transformedPoints = computed(() => {
 //  [5, 15]
 //];
 
-// 获取节点数据
-const fetchNodes = async () => {
-  try {
-    const response = await axios.get('/api/nodes', {
-      params: {
-        // status: 'ONLINE', // 可选参数，根据需求调整
-        // role: 'CLIENT',  // 可选参数，根据需求调整
-        // cloudProvider: 'AWS' // 可选参数，根据需求调整
-      }
-    });
-    nodes.value = response.data;
-  } catch (error) {
-    console.error('Failed to fetch nodes:', error);
-  }
-};
 
 // 在组件挂载时获取数据
-onMounted(fetchNodes);
+onMounted(async () => {
+  nodes.value = await fetchNodes({});
+  links.value = await fetchLinks({});
+})
 </script>
 
 <style scoped>
@@ -177,6 +154,7 @@ onMounted(fetchNodes);
   display: flex;
   flex-direction: column;
 }
+
 .card {
   height: 400px;
   overflow: auto;

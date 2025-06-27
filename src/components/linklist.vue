@@ -19,11 +19,12 @@
 
     <!-- 表格展示 -->
     <el-table :data="filteredList" style="width: 100%" border stripe highlight-current-row>
-      <el-table-column prop="from" label="起始节点" min-width="160" />
-      <el-table-column prop="to" label="目标节点" min-width="160" />
+      <el-table-column prop="linkId" label="链路ID" min-width="160" />
+      <el-table-column prop="sourceRelayId" label="起始节点" min-width="160" />
+      <!-- <el-table-column prop="to" label="目标节点" min-width="160" /> -->
       <el-table-column label="策略" min-width="120">
         <template #default="{ row }">
-          <el-tag :type="getPolicyTagType(row.policy)" effect="dark">{{ row.policy }}</el-tag>
+          <el-tag :type="getPolicyTagType(row.routingPolicy)" effect="dark">{{ row.routingPolicy }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="状态" min-width="120">
@@ -33,7 +34,7 @@
       </el-table-column>
       <el-table-column label="" min-width="100" align="center">
         <template #default="{ row }">
-          <el-button size="small" type="primary" @click="goToDetail(row.id)">详情</el-button>
+          <el-button size="small" type="primary" @click="goToDetail(row.linkId)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -41,30 +42,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, toRef  } from 'vue';
 import { useRouter } from 'vue-router';
 import { Search } from '@element-plus/icons-vue';
 
 const router = useRouter();
 
-// 模拟链路数据
-const internalList = ref([]);
-const fetchLinks = async () => {
-  try {
-    const response = await axios.get('/api/links', {
-      params: {
-
-      }
-    });
-    internalList.value = response.data;
-  } catch (error) {
-    console.error('Failed to fetch links:', error);
+// 接收父组件传入的数据
+const props = defineProps({
+  list: {
+    type: Array,
+    default: () => []
   }
-};
-
-onMounted(() => {
-fetchLinks();
 });
+const internalList = toRef(props, 'list');
 
 // 筛选项
 const selectedStatus = ref('');
