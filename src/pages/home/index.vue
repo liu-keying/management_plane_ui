@@ -2,7 +2,7 @@
   <el-row :gutter="20" class="top-row">
     <el-col :span="18">
       <!-- <el-card class="tall-card"> -->
-      <MapView :points="nodes" :lineConnections='[]' />
+      <MapView :points="nodes" :lineConnections='lineConnections' />
       <!-- </el-card> -->
     </el-col>
     <el-col :span="6">
@@ -57,7 +57,7 @@
         <template #header>
           <div class="card-header">
             <span>用户信息</span>
-            <router-link to="/user" class="more-link">更多</router-link>
+            <router-link to="/users" class="more-link">更多</router-link>
           </div>
         </template>
         <userlist />
@@ -125,19 +125,20 @@ const stats = computed(() => [
 ]);
 
 
-
 const nodes = ref<NodeItem[]>([])
 const links = ref<LinkItem[]>([]);
-const alerts = ref([]);
-const users = ref([]);
+const alerts = ref([1]);
+const users = ref([1,2,3,4,5]);
+const lineConnections = computed(() => 
+  links.value
+    .map(link => {
+      const source = link.sourceRelayId;
+      const target = link.relayIds[link.relayIds.length - 1];
+      return source && target ? [source, target] : null;
+    })
+    .filter((pair): pair is [string, string] => pair !== null)
+);
 
-//const lineConnections = [
-//  [1, 2],
-//  [5, 13],
-//  [5, 7],
-//  [13, 6],
-//  [5, 15]
-//];
 
 
 // 在组件挂载时获取数据

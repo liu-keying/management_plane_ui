@@ -4,16 +4,17 @@
     <div class="filter-bar">
       <el-input v-model="searchKeyword" placeholder="搜索 节点/状态/策略" clearable class="filter-item search-input">
         <template #prefix>
-          <el-icon><Search /></el-icon>
+          <el-icon>
+            <Search />
+          </el-icon>
         </template>
       </el-input>
 
-      <el-select v-model="selectedStatus" placeholder="选择状态" clearable class="filter-item">
-        <el-option v-for="status in statusOptions" :key="status" :label="status" :value="status" />
-      </el-select>
-
       <el-select v-model="selectedPolicy" placeholder="选择策略" clearable class="filter-item">
         <el-option v-for="policy in policyOptions" :key="policy" :label="policy" :value="policy" />
+      </el-select>
+      <el-select v-model="selectedStatus" placeholder="选择状态" clearable class="filter-item">
+        <el-option v-for="status in statusOptions" :key="status" :label="status" :value="status" />
       </el-select>
     </div>
 
@@ -42,7 +43,7 @@
 </template>
 
 <script setup>
-import { ref, computed, toRef  } from 'vue';
+import { ref, computed, toRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { Search } from '@element-plus/icons-vue';
 
@@ -70,18 +71,19 @@ const filteredList = computed(() => {
   return internalList.value.filter(item => {
     const keyword = searchKeyword.value.trim().toLowerCase();
     const matchKeyword = keyword
-      ? item.from.toLowerCase().includes(keyword) ||
-        item.to.toLowerCase().includes(keyword) ||
+      ? item.linkId.toLowerCase().includes(keyword) ||
+        item.sourceRelayId.toLowerCase().includes(keyword) ||
         item.status.toLowerCase().includes(keyword) ||
-        item.policy.toLowerCase().includes(keyword)
+        item.routingPolicy.toLowerCase().includes(keyword)
       : true;
 
     const matchStatus = selectedStatus.value ? item.status === selectedStatus.value : true;
-    const matchPolicy = selectedPolicy.value ? item.policy === selectedPolicy.value : true;
+    const matchPolicy = selectedPolicy.value ? item.routingPolicy === selectedPolicy.value : true;
 
     return matchKeyword && matchStatus && matchPolicy;
   });
 });
+
 
 // 跳转详情页
 const goToDetail = (id) => {

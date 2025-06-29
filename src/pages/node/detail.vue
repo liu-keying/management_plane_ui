@@ -200,7 +200,7 @@ const relayForm = ref({
 const openDialog = (action: string) => {
   currentAction.value = action;
   if (action === 'createRelay') {
-    dialogTitle.value = '创建 RELAY';
+    dialogTitle.value = '创建中继节点';
   } else if (action === 'updateNode') {
     dialogTitle.value = '更新节点';
     // 填充 nodeForm

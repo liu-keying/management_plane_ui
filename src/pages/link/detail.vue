@@ -1,6 +1,6 @@
 <template>
   <div class="link-detail">
-    <MapView :points="[]" :lineConnections="lineConnections" />
+    <MapView :points="points" :lineConnections="lineConnections" />
     <el-card :body-style="{ padding: '20px' }" class="detail-card">
       <div class="detail-info">
         <el-row :gutter="20">
@@ -22,7 +22,7 @@
           <el-col :span="8">
             <div class="info-item">
               <span class="label">电路数量:</span>
-              <span>{{ link?.linkId }}</span>
+              <span>{{ link?.circuitCount }}</span>
             </div>
             <div class="info-item">
               <span class="label">总流量:</span>
@@ -112,53 +112,139 @@
       </template>
     </el-dialog>
     <el-drawer v-model="drawerVisible" title="选择电路节点" size="50%" direction="rtl" :destroy-on-close="true">
+      <div style="margin-top: 10px;">
+        <span>当前电路: </span>
+        <span v-if="editForm.relayIds.length">{{ formatPath(editForm.relayIds) }}</span>
+        <span v-else>{{ formatPath(link?.relayIds) }}</span>
+      </div>
+      <br><br><br>
       <div style="height: calc(100% - 60px); padding: 10px;">
-        <MapView :points="points" :selectedNodeIds="editForm.relayIds || []" :@selectPoint="handleSelectPoint" />
+        <div class="node-list">
+          <div class="search-box" style="margin-bottom: 20px;">
+            <el-input v-model="searchKeyword" placeholder="搜索节点ID或昵称" prefix-icon="Search" clearable />
+          </div>
+          <div class="node-items">
+            <div v-for="node in filteredNodes" :key="node.nodeId" class="node-item"
+              :class="{ selected: editForm.relayIds.includes(node.nodeId) }" @click="toggleNodeSelection(node.nodeId)">
+              <div class="node-info">
+                <div class="node-id">{{ node.nodeId }}</div>
+                <div class="node-details">
+                  <span class="nickname">{{ node.nickname || '无昵称' }}</span>
+                  <span class="status" :class="node.status.toLowerCase()">{{ node.status }}</span>
+                  <span class="location">{{ node.geoLocation }}</span>
+                </div>
+              </div>
+              <div class="selection-indicator">
+                <el-icon v-if="editForm.relayIds.includes(node.nodeId)" color="#409EFF">
+                  <Check />
+                </el-icon>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <template #footer>
         <div style="text-align: right;">
+          <span style="margin-right: 10px; color: #666;">
+            已选择 {{ editForm.relayIds.length }} 个节点
+          </span>
           <el-button @click="drawerVisible = false">取消</el-button>
-          <el-button type="primary" @click="drawerVisible = false">确定</el-button>
+          <el-button type="primary" @click="confirmSelection">确定</el-button>
         </div>
       </template>
     </el-drawer>
+
   </div>
 </template>
 
 
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
-import { ElButton, ElDialog, ElTag, ElRow, ElCol, ElCard } from 'element-plus';
+import { ElButton, ElDialog, ElTag, ElRow, ElCol, ElCard, ElIcon } from 'element-plus';
+import { Check } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
-import { computed } from "vue";
-import { formatDate, formatBytes } from "@/utils/formatters.ts";
+import { formatDate, formatBytes, formatPath } from "@/utils/formatters.ts";
 
 import useGlobalConfig from '@/composables/useGlobalConfig';
 import MapView from '@/components/MapView.vue';
 import { fetchLinkDetail, type LinkItem } from '@/api/link';
+import { fetchNodes, type NodeItem } from '@/api/node'
 
 const { useMock } = useGlobalConfig();
 
 const route = useRoute();
 const router = useRouter();
 const link = ref<LinkItem>();
+const nodes = ref<NodeItem[]>([]);
 
 const linkId = route.params.linkId as string;
 
-const points = [
+const points = computed(() => {
+  if (!link.value || !link.value.relayIds || !nodes.value.length) {
+    return [];
+  }
 
-];
+  return nodes.value.filter(node =>
+    link.value.relayIds.includes(node.nodeId)
+  );
+});
 
 
-const lineConnections = [
 
-];
+const lineConnections = computed(() => {
+  if (!link.value || !link.value.relayIds || link.value.relayIds.length < 2) {
+    return [];
+  }
+
+  const connections = [];
+  for (let i = 0; i < link.value.relayIds.length - 1; i++) {
+    connections.push([link.value.relayIds[i], link.value.relayIds[i + 1]]);
+  }
+
+  return connections;
+});
+
 
 
 const drawerVisible = ref(false);
+const searchKeyword = ref('');
+
+const filteredNodes = computed(() => {
+  if (!nodes.value.length) return [];
+
+  if (!searchKeyword.value) {
+    return nodes.value;
+  }
+
+  const keyword = searchKeyword.value.toLowerCase();
+  return nodes.value.filter(node =>
+    node.nodeId.toLowerCase().includes(keyword) ||
+    (node.nickname && node.nickname.toLowerCase().includes(keyword)) ||
+    (node.geoLocation && node.geoLocation.toLowerCase().includes(keyword))
+  );
+});
+
+const toggleNodeSelection = (nodeId: string) => {
+  const index = editForm.value.relayIds.indexOf(nodeId);
+  if (index > -1) {
+    // 如果已选中，则取消选中
+    editForm.value.relayIds.splice(index, 1);
+  } else {
+    // 如果未选中，则添加到选中列表
+    editForm.value.relayIds.push(nodeId);
+  }
+  console.log('当前选中的节点:', editForm.value.relayIds);
+};
+
+const confirmSelection = () => {
+  console.log('确认选择的电路:', editForm.value.relayIds);
+  ElMessage.success(`已选择 ${editForm.value.relayIds.length} 个节点`);
+  drawerVisible.value = false;
+};
+
 
 const openDrawer = () => {
   drawerVisible.value = true;
@@ -209,6 +295,7 @@ const confirmAction = async () => {
         if (editForm.value.relayIds.length) {
           link.value.relayIds = editForm.value.relayIds;
         }
+        link.value.updatedAt = new Date();
         ElMessage.success('链路更新成功');
       }
       //await updateLink();// TODO: 调用API
@@ -217,6 +304,7 @@ const confirmAction = async () => {
       console.log('销毁链路', link.value);
       // TODO: 调用API
       ElMessage.success('链路销毁成功');
+      goBack();
     }
 
     dialogVisible.value = false; //成功后自动关闭弹窗
@@ -233,10 +321,7 @@ const handleSelectPoint = (point) => {
   }
 };
 
-const formatPath = (nodes: string[]) => {
-  if (!nodes || nodes.length === 0) return 'N/A';
-  return nodes.map((id) => `${id}`).join(' → ');
-};
+
 
 
 
@@ -260,6 +345,7 @@ onMounted(async () => {
     return;
   }
   link.value = linkData;
+  nodes.value = await fetchNodes({});
 }
 );
 </script>
@@ -319,5 +405,94 @@ onMounted(async () => {
   background-color: #d9ecff;
   border-color: #a0cfff;
   color: #337ecc;
+}
+
+.node-list {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.node-items {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.node-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.node-item:hover {
+  background-color: #f5f7fa;
+  border-color: #c0c4cc;
+}
+
+.node-item.selected {
+  background-color: #ecf5ff;
+  border-color: #409EFF;
+}
+
+.node-info {
+  flex: 1;
+}
+
+.node-id {
+  font-weight: bold;
+  font-size: 14px;
+  color: #303133;
+  margin-bottom: 4px;
+}
+
+.node-details {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #606266;
+}
+
+.nickname {
+  color: #409EFF;
+}
+
+.status {
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.status.online {
+  background-color: #f0f9ff;
+  color: #67c23a;
+}
+
+.status.offline {
+  background-color: #fdf6ec;
+  color: #e6a23c;
+}
+
+.status.destroying {
+  background-color: #fef0f0;
+  color: #f56c6c;
+}
+
+.location {
+  color: #909399;
+}
+
+.selection-indicator {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

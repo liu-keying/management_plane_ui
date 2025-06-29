@@ -138,11 +138,9 @@ const initChart = () => {
   });
 };
 
-const setChartOption = () => {
-  if (!worldGraph.value) return;
-
-   // 转换points数据，将geoLocation转换为坐标
-  const normalPoints = props.points.map(p => {
+// 处理点数据，转换地理位置为坐标
+const processPoints = () => {
+  return props.points.map(p => {
     const coords = p.value || convertGeoLocationToCoords(p.geoLocation);
     return {
       ...p,
@@ -152,6 +150,13 @@ const setChartOption = () => {
       }
     };
   });
+};
+
+
+const setChartOption = () => {
+  if (!worldGraph.value) return;
+
+  const normalPoints = processPoints();
 
 
   const selectedPoints = props.points.filter(p => props.selectedNodeIds.includes(p.nodeId));
@@ -251,9 +256,10 @@ const resizeChart = () => {
 };
 
 const generateLines = () => {
+  const processedPoints = processPoints();
   lines.value = props.lineConnections.map(([fromId, toId], index) => {
-    const from = props.points.find(p => p.nodeId === fromId);
-    const to = props.points.find(p => p.nodeId === toId);
+    const from = processedPoints.find(p => p.nodeId === fromId);
+    const to = processedPoints.find(p => p.nodeId === toId);
     if (from && to) {
       return {
         linkId: index + 1,
@@ -262,11 +268,15 @@ const generateLines = () => {
         coords: [from.value, to.value]
       };
     }
+    return null;
   }).filter(Boolean);
 };
 
+
 onMounted(async () => {
   generateLines();
+  console.log('props.points', props.points);
+  console.log('props.lineConnections', props.lineConnections);
   await nextTick();
   initChart();
 
