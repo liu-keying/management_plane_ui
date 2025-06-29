@@ -29,8 +29,8 @@
               <span>{{ formatBytes(link?.totalTraffic) }}</span>
             </div>
             <div class="info-item">
-              <span class="label">状态:</span>
-              <span>{{ link?.status }}</span>
+              <span class="label">源节点:</span>
+              <span>{{ link?.sourceRelayId }}</span>
             </div>
           </el-col>
 
@@ -70,9 +70,9 @@
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="400px">
       <template v-if="currentAction === 'updateLink'">
         <el-form :model="editForm" label-width="100px">
-          <el-form-item label="链路ID">
+          <!-- <el-form-item label="链路ID">
             <el-input v-model="editForm.linkId" />
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="路由策略">
             <el-select v-model="editForm.routingPolicy" placeholder="选择策略">
               <el-option label="RANDOM" value="RANDOM" />
