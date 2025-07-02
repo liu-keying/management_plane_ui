@@ -44,3 +44,8 @@ export function defaultFormatter<T = any>(row: T, column: TableColumnCtx<T>): st
   const value = row[(column.property as keyof T)];
   return value?.toString().trim() ? String(value) : '无';
 }
+
+export function formatPath(nodes: string[]): string{
+  if (!nodes || nodes.length === 0) return 'N/A';
+  return nodes.map((id) => `${id}`).join(' → ');
+};

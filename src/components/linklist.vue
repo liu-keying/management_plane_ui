@@ -4,26 +4,28 @@
     <div class="filter-bar">
       <el-input v-model="searchKeyword" placeholder="搜索 节点/状态/策略" clearable class="filter-item search-input">
         <template #prefix>
-          <el-icon><Search /></el-icon>
+          <el-icon>
+            <Search />
+          </el-icon>
         </template>
       </el-input>
 
-      <el-select v-model="selectedStatus" placeholder="选择状态" clearable class="filter-item">
-        <el-option v-for="status in statusOptions" :key="status" :label="status" :value="status" />
-      </el-select>
-
       <el-select v-model="selectedPolicy" placeholder="选择策略" clearable class="filter-item">
         <el-option v-for="policy in policyOptions" :key="policy" :label="policy" :value="policy" />
+      </el-select>
+      <el-select v-model="selectedStatus" placeholder="选择状态" clearable class="filter-item">
+        <el-option v-for="status in statusOptions" :key="status" :label="status" :value="status" />
       </el-select>
     </div>
 
     <!-- 表格展示 -->
     <el-table :data="filteredList" style="width: 100%" border stripe highlight-current-row>
-      <el-table-column prop="from" label="起始节点" min-width="160" />
-      <el-table-column prop="to" label="目标节点" min-width="160" />
+      <el-table-column prop="linkId" label="链路ID" min-width="160" />
+      <el-table-column prop="sourceRelayId" label="起始节点" min-width="160" />
+      <!-- <el-table-column prop="to" label="目标节点" min-width="160" /> -->
       <el-table-column label="策略" min-width="120">
         <template #default="{ row }">
-          <el-tag :type="getPolicyTagType(row.policy)" effect="dark">{{ row.policy }}</el-tag>
+          <el-tag :type="getPolicyTagType(row.routingPolicy)" effect="dark">{{ row.routingPolicy }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="状态" min-width="120">
@@ -33,7 +35,7 @@
       </el-table-column>
       <el-table-column label="" min-width="100" align="center">
         <template #default="{ row }">
-          <el-button size="small" type="primary" @click="goToDetail(row.id)">详情</el-button>
+          <el-button size="small" type="primary" @click="goToDetail(row.linkId)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -41,30 +43,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, toRef } from 'vue';
 import { useRouter } from 'vue-router';
 import { Search } from '@element-plus/icons-vue';
 
 const router = useRouter();
 
-// 模拟链路数据
-const internalList = ref([]);
-const fetchLinks = async () => {
-  try {
-    const response = await axios.get('/api/links', {
-      params: {
-
-      }
-    });
-    internalList.value = response.data;
-  } catch (error) {
-    console.error('Failed to fetch links:', error);
+// 接收父组件传入的数据
+const props = defineProps({
+  list: {
+    type: Array,
+    default: () => []
   }
-};
-
-onMounted(() => {
-fetchLinks();
 });
+const internalList = toRef(props, 'list');
 
 // 筛选项
 const selectedStatus = ref('');
@@ -79,18 +71,19 @@ const filteredList = computed(() => {
   return internalList.value.filter(item => {
     const keyword = searchKeyword.value.trim().toLowerCase();
     const matchKeyword = keyword
-      ? item.from.toLowerCase().includes(keyword) ||
-        item.to.toLowerCase().includes(keyword) ||
+      ? item.linkId.toLowerCase().includes(keyword) ||
+        item.sourceRelayId.toLowerCase().includes(keyword) ||
         item.status.toLowerCase().includes(keyword) ||
-        item.policy.toLowerCase().includes(keyword)
+        item.routingPolicy.toLowerCase().includes(keyword)
       : true;
 
     const matchStatus = selectedStatus.value ? item.status === selectedStatus.value : true;
-    const matchPolicy = selectedPolicy.value ? item.policy === selectedPolicy.value : true;
+    const matchPolicy = selectedPolicy.value ? item.routingPolicy === selectedPolicy.value : true;
 
     return matchKeyword && matchStatus && matchPolicy;
   });
 });
+
 
 // 跳转详情页
 const goToDetail = (id) => {

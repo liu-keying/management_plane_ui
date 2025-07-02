@@ -31,12 +31,12 @@ const router = useRouter()
 
 onMounted(() => {
   internalList.value = [
-    //{ id: 1, name: '节点9', ipaddress: '103.45.98.12', level: '高风险' },
-    //{ id: 2, name: '节点14', ipaddress: '192.168.0.1', level: '中风险' },
-    //{ id: 3, name: '节点10', ipaddress: '10.10.10.10', level: '低风险' },
-    //{ id: 4, name: '节点4', ipaddress: '8.8.8.8', level: '中风险' },
-    //{ id: 5, name: '节点7', ipaddress: '123.123.123.123', level: '高风险' },
-    //{ id: 6, name: '节点11', ipaddress: '172.16.0.1', level: '低风险' }
+    { id: 1, name: 'node-009', ipaddress: '172.18.0.9', level: '高风险' },
+    { id: 2, name: 'node-014', ipaddress: '192.168.100.14', level: '中风险' },
+    { id: 3, name: 'node-008', ipaddress: '192.168.10.8', level: '低风险' },
+    { id: 4, name: 'node-004', ipaddress: '8.8.8.8', level: '中风险' },
+    { id: 5, name: 'node-011', ipaddress: '192.168.0.4', level: '高风险' },
+    { id: 6, name: 'node-012', ipaddress: '203.0.113.12', level: '低风险' }
   ]
 })
 

@@ -1,173 +1,180 @@
 <template>
   <div class="node-detail">
+    <div v-if="node === null" class="loading-container">
+      <el-empty description="正在加载节点信息..." />
+    </div>
+    <template v-else>
+      <MapView :points="[node]" :lineConnections="[]" />
+      <el-card :body-style="{ padding: '20px' }" class="detail-card">
+        <!-- <h2 class="title">节点详细信息</h2> -->
 
-    <MapView :points="points" :lineConnections="[]" />
-    <el-card :body-style="{ padding: '20px' }" class="detail-card">
-      <!-- <h2 class="title">节点详细信息</h2> -->
+        <div class="detail-info">
+          <el-row :gutter="20">
+            <el-col :span="6">
+              <div class="info-item">
+                <span class="label">节点ID:</span>
+                <span>{{ node.nodeId }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">昵称:</span>
+                <span>{{ node.nickname || '无' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">IP地址:</span>
+                <span>{{ node.ipAddress || '无' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">指纹:</span>
+                <span>{{ node.fingerprint || '无' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">中继数量:</span>
+                <span>{{ node.relayCount }}</span>
+              </div>
+            </el-col>
 
-      <div class="detail-info">
-        <el-row :gutter="20">
-          <el-col :span="6">
-            <div class="info-item">
-              <span class="label">节点ID:</span>
-              <span>{{ node.nodeId }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">昵称:</span>
-              <span>{{ node.nickname  || '无' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">IP地址:</span>
-              <span>{{ node.ipAddress  || '无'  }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">指纹:</span>
-              <span>{{ node.fingerprint  || '无'  }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">中继数量:</span>
-              <span>{{ node.relayCount}}</span>
-            </div>
-          </el-col>
+            <el-col :span="6">
 
-          <el-col :span="6">
+              <div class="info-item">
+                <span class="label">CPU使用率:</span>
+                <span>{{ formatPercentage(node.cpuUsage) }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">内存使用率:</span>
+                <span>{{ formatPercentage(node.memoryUsage) }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">流入流量:</span>
+                <span>{{ formatBytes(node.trafficIn) }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">流出流量:</span>
+                <span>{{ formatBytes(node.trafficOut) }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">最大中继容量：</span>
+                <span>{{ node.maxRelayCapacity }}</span>
+              </div>
+            </el-col>
 
-            <div class="info-item">
-              <span class="label">CPU使用率:</span>
-              <span>{{ formatPercentage(node.cpuUsage) }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">内存使用率:</span>
-              <span>{{ formatPercentage(node.memoryUsage) }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">流入流量:</span>
-              <span>{{ formatBytes(node.trafficIn) }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">流出流量:</span>
-              <span>{{ formatBytes(node.trafficOut) }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">最大中继容量：</span>
-              <span>{{ node.maxRelayCapacity}}</span>
-            </div>
-          </el-col>
+            <el-col :span="6">
+              <div class="info-item">
+                <span class="label">角色:</span>
+                <span>{{ node.role }}</span>
+                <!-- <span :class="roleClass(node.role)">{{ node.role }}</span> -->
+              </div>
+              <div class="info-item">
+                <span class="label">状态:</span>
+                <span> {{ node.status }} </span>
+                <!-- <el-tag :type="statusTagType(node.status)" size="small">{{ node.status }}</el-tag> -->
+              </div>
+              <div class="info-item">
+                <span class="label">风险等级:</span>
+                <span>{{ node.riskLevel }}</span>
+              </div>
 
-          <el-col :span="6">
-            <div class="info-item">
-              <span class="label">角色:</span>
-              <span>{{ node.role }}</span>
-              <!-- <span :class="roleClass(node.role)">{{ node.role }}</span> -->
-            </div>
-            <div class="info-item">
-              <span class="label">状态:</span>
-              <span> {{ node.status }} </span>
-              <!-- <el-tag :type="statusTagType(node.status)" size="small">{{ node.status }}</el-tag> -->
-            </div>
-            <div class="info-item">
-              <span class="label">风险等级:</span>
-              <span>{{ node.riskLevel }}</span>
-            </div>
+              <div class="info-item">
+                <span class="label">云提供商:</span>
+                <span>{{ node.cloudProvider }}</span>
+              </div>
 
-            <div class="info-item">
-              <span class="label">云提供商:</span>
-              <span>{{ node.cloudProvider }}</span>
-            </div>
+            </el-col>
 
-          </el-col>
+            <el-col :span="6">
+              <div class="info-item">
+                <span class="label">地理位置:</span>
+                <span>{{ node.geoLocation }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">创建时间:</span>
+                <span>{{ formatDate(node.createdAt) }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">创建人:</span>
+                <span>{{ node.createdBy || '无' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">最后心跳:</span>
+                <span>{{ formatDate(node.lastHeartbeat) }}</span>
+              </div>
+            </el-col>
+          </el-row>
+        </div>
+        <!-- 按钮区域 -->
+        <div class="action-buttons">
+          <el-button type="primary" @click="openDialog('createRelay')">创建中继节点</el-button>
+          <el-button type="warning" @click="openDialog('updateNode')">更新节点信息</el-button>
+          <el-button type="danger" @click="openDialog('destroyNode')">销毁节点</el-button>
+          <el-button type="primary" @click="goBack" class="back-button">返回节点列表</el-button>
+        </div>
+      </el-card>
+      <!-- 弹窗 -->
+      <el-dialog v-model="dialogVisible" :title="dialogTitle" width="400px">
+        <template v-if="currentAction === 'updateNode'">
+          <el-form :model="nodeForm" label-width="100px">>
+            <el-form-item label="昵称">
+              <el-input v-model="nodeForm.nickname" />
+            </el-form-item>
+            <el-form-item label="角色">
+              <el-select v-model="nodeForm.role" placeholder="选择角色">
+                <el-option label="VPS_TE" value="VPS_TE" />
+                <el-option label="VPS_RELAY" value="VPS_RELAY" />
+                <el-option label="CLIENT" value="CLIENT" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="状态">
+              <el-select v-model="nodeForm.status" placeholder="选择状态">
+                <el-option label="ONLINE" value="ONLINE" />
+                <el-option label="OFFLINE" value="OFFLINE" />
+                <el-option label="DESTROYING" value="DESTROYING" />
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </template>
+        <template v-if="currentAction === 'createRelay'">
+          <el-form :model="relayForm" label-width="100px">>
+            <el-form-item label="昵称">
+              <el-input v-model="relayForm.nickname" />
+            </el-form-item>
+            <el-form-item label="中继类型">
+              <el-select v-model="relayForm.type" placeholder="选择类型">
+                <el-option label="ANONYMOUS" value="ANONYMOUS" />
+                <el-option label="ACCESS" value="ACCESS" />
+                <el-option label="UNKNOWN" value="UNKNOWN" />
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </template>
+        <template v-else>
+          <span>{{ dialogMessage }}</span>
+        </template>
 
-          <el-col :span="6">
-            <div class="info-item">
-              <span class="label">地理位置:</span>
-              <span>{{ node.geoLocation }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">创建时间:</span>
-              <span>{{ formatDate(node.createdAt) }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">创建人:</span>
-              <span>{{ node.createdBy  || '无' }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">最后心跳:</span>
-              <span>{{ formatDate(node.lastHeartbeat) }}</span>
-            </div>
-          </el-col>
-        </el-row>
-      </div>
-      <!-- 按钮区域 -->
-      <div class="action-buttons">
-        <el-button type="primary" @click="openDialog('createRelay')">创建中继节点</el-button>
-        <el-button type="warning" @click="openDialog('updateNode')">更新节点信息</el-button>
-        <el-button type="danger" @click="openDialog('destroyNode')">销毁节点</el-button>
-        <el-button type="primary" @click="goBack" class="back-button">返回节点列表</el-button>
-      </div>
-    </el-card>
-    <!-- 弹窗 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="400px">
-      <template v-if="currentAction === 'updateNode'">
-        <el-form :model="nodeForm" label-width="100px">>
-          <el-form-item label="昵称">
-            <el-input v-model="nodeForm.nickname" />
-          </el-form-item>
-          <el-form-item label="角色">
-            <el-select v-model="nodeForm.role" placeholder="选择角色">
-              <el-option label="VPS_TE" value="VPS_TE" />
-              <el-option label="VPS_RELAY" value="VPS_RELAY" />
-              <el-option label="CLIENT" value="CLIENT" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="状态">
-            <el-select v-model="nodeForm.status" placeholder="选择状态">
-              <el-option label="ONLINE" value="ONLINE" />
-              <el-option label="OFFLINE" value="OFFLINE" />
-              <el-option label="DESTROYING" value="DESTROYING" />
-            </el-select>
-          </el-form-item>
-        </el-form>
-      </template>
-      <template v-if="currentAction === 'createRelay'">
-        <el-form :model="relayForm" label-width="100px">>
-          <el-form-item label="昵称">
-            <el-input v-model="relayForm.nickname" />
-          </el-form-item>
-          <el-form-item label="中继类型">
-            <el-select v-model="relayForm.type" placeholder="选择类型">
-              <el-option label="ANONYMOUS" value="ANONYMOUS" />
-              <el-option label="ACCESS" value="ACCESS" />
-              <el-option label="UNKNOWN" value="UNKNOWN" />
-            </el-select>
-          </el-form-item>
-        </el-form>
-      </template>
-      <template v-else>
-        <span>{{ dialogMessage }}</span>
-      </template>
-
-      <template #footer>
-        <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="confirmAction">确认</el-button>
-      </template>
-    </el-dialog>
+        <template #footer>
+          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="confirmAction">确认</el-button>
+        </template>
+      </el-dialog>
+    </template>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
 import { ElButton, ElDialog, ElTag, ElRow, ElCol, ElCard } from 'element-plus';
 import { ElMessage } from 'element-plus';
-import {formatDate, formatBytes, formatPercentage} from "@/utils/formatters.ts";
+import { formatDate, formatBytes, formatPercentage } from "@/utils/formatters.ts";
+import { fetchNodeDetail, type NodeItem } from '@/api/node';
+import useGlobalConfig from '@/composables/useGlobalConfig';
 
 import MapView from '@/components/MapView.vue';
 
 const router = useRouter();
+const { useMock } = useGlobalConfig();
 
 const goBack = () => {
-  router.push('/node'); 
+  router.push('/node');
 };
 
 
@@ -186,14 +193,14 @@ const nodeForm = ref({
 
 const relayForm = ref({
   nickname: '',
-  type:''
+  type: ''
 });
 
 // 打开弹窗
-const openDialog = (action) => {
+const openDialog = (action: string) => {
   currentAction.value = action;
   if (action === 'createRelay') {
-    dialogTitle.value = '创建 RELAY';
+    dialogTitle.value = '创建中继节点';
   } else if (action === 'updateNode') {
     dialogTitle.value = '更新节点';
     // 填充 nodeForm
@@ -215,12 +222,12 @@ const confirmAction = async () => {
   try {
     if (currentAction.value === 'createRelay') {
       await createRelay();
-      await fetchNodeDetail(); // 成功后刷新节点数据
+      await fetchNodeDetail(nodeId); // 成功后刷新节点数据
     } else if (currentAction.value === 'updateNode') {
       await updateNode();
-      await fetchNodeDetail();     // 成功后刷新节点数据
+      await fetchNodeDetail(nodeId);     // 成功后刷新节点数据
     } else if (currentAction.value === 'destroyNode') {
-      await deleteNode(node.value.nodeId);
+      await deleteNode();
 
       //ElMessage.success('节点销毁成功');
     }
@@ -232,7 +239,12 @@ const confirmAction = async () => {
 };
 
 const createRelay = async () => {
-  console.log('创建中继节点',node.value,relayForm.value);
+  console.log('创建中继节点', node.value, relayForm.value);
+  if (useMock) {
+    node.value.relayCount++;
+    ElMessage.success('中继节点创建成功');
+    return;
+  }
   try {
     const response = await axios.post('/api/nodes', {
       nickname: relayForm.value.nickname,
@@ -256,7 +268,15 @@ const createRelay = async () => {
 
 const updateNode = async () => {
   console.log('更新节点，新的数据：', nodeForm.value);
-
+  if (useMock.value) {
+    if (node.value) {
+      node.value.nickname = nodeForm.value.nickname;
+      node.value.role = nodeForm.value.role as NodeItem['role'];
+      node.value.status = nodeForm.value.status as NodeItem['status'];
+    }
+    ElMessage.success('节点更新成功');
+    return;
+  }
   try {
     const nodeId = nodeForm.value.nodeId;
     const response = await axios.put(`/api/nodes/${nodeId}`, {
@@ -279,46 +299,35 @@ const updateNode = async () => {
 };
 
 const deleteNode = async () => {
-    console.log('销毁节点', node.value);
-    try {
-      const userId = null; //TODO: 传递管理员ID
-      const response = await axios.delete(`/api/nodes/node/${node.value.nodeId}?userId=${userId}`
-      );
-      if (response.status === 200) {
-        ElMessage.success('节点销毁成功');
-        goBack(); // 销毁后返回节点列表
-      } else {
-        ElMessage.error('节点销毁失败，请稍后重试');
-      }
-    } catch (error) {
-      console.error('销毁节点失败：', error);
-      ElMessage.error('节点销毁失败');
+  console.log('销毁节点', node.value);
+  if (useMock) {
+    ElMessage.success('节点销毁成功');
+    goBack(); // 销毁后返回节点列表
+    return;
+  }
+  try {
+    const userId = null; //TODO: 传递管理员ID
+    const response = await axios.delete(`/api/nodes/node/${node.value.nodeId}?userId=${userId}`
+    );
+    if (response.status === 200) {
+      ElMessage.success('节点销毁成功');
+      goBack(); // 销毁后返回节点列表
+    } else {
+      ElMessage.error('节点销毁失败，请稍后重试');
     }
+  } catch (error) {
+    console.error('销毁节点失败：', error);
+    ElMessage.error('节点销毁失败');
+  }
 };
 
 const route = useRoute();
 
 
-const nodeId = route.params.nodeId; // 路由传递节点ID
+const nodeId = route.params.nodeId as string; // 路由传递节点ID
 
-const node = ref({});
+const node = ref<NodeItem | null>(null);
 
-const points = ref([]);
-
-const fetchNodeDetail = async () => {
-   try {
-    const response = await axios.get('/api/nodes/'+nodeId, {});
-    node.value = response.data;
-  } catch (error) {
-    console.error('Failed to fetch nodes:', error);
-  }
-
-
-  // // 更新 points 中的 value
-  // points.value = [
-  //   { id: nodeId, value: [node.value.longitude, node.value.latitude] }
-  // ];
-};
 
 
 // 根据状态返回合适的标签类型
@@ -350,9 +359,17 @@ const roleClass = (role) => {
 };
 
 // 页面加载时获取节点数据
-onMounted(() => {
-  fetchNodeDetail();
+onMounted(async () => {
+  const nodeData = await fetchNodeDetail(nodeId);
+  if (nodeData === null) {
+    ElMessage.error('节点信息不存在或获取失败');
+    goBack();
+    return;
+  }
+  node.value = nodeData;
 });
+
+
 </script>
 
 <style scoped>
