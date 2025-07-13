@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import MapView from "@/components/MapView.vue";
 import nodelist from "@/components/nodelist.vue";
 import linklist from "@/components/linklist.vue";
@@ -139,13 +139,31 @@ const lineConnections = computed(() =>
     .filter((pair): pair is [string, string] => pair !== null)
 );
 
+// 定义刷新间隔，单位为毫秒
+const refreshInterval = ref(5000); // 默认为5秒
 
+// 定义定时器ID
+let intervalId: number | undefined;
 
 // 在组件挂载时获取数据
 onMounted(async () => {
   nodes.value = await fetchNodes({});
   links.value = await fetchLinks({});
+
+  // 设置定时器，根据refreshInterval的值来刷新数据
+  intervalId = setInterval(async () => {
+    nodes.value = await fetchNodes({});
+    links.value = await fetchLinks({});
+  }, refreshInterval.value);
 })
+
+// 在组件卸载时清除定时器
+onBeforeUnmount(() => {
+  if (intervalId) {
+    clearInterval(intervalId);
+  }
+});
+
 </script>
 
 <style scoped>
