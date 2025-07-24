@@ -477,7 +477,7 @@ const locationMap = {
 <style scoped>
 #worldgraph {
   width: 100%;
-  height: 600px;
+  height: 400px;
   position: relative;
 }
 

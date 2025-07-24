@@ -25,7 +25,7 @@
     </el-col>
   </el-row>
 
-  <el-row :gutter="20" class="bottom-row" style="margin-top: 20px;">
+  <!-- <el-row :gutter="20" class="bottom-row" style="margin-top: 20px;">
     <el-col :span="12">
       <el-card class="card">
         <template #header>
@@ -74,7 +74,7 @@
         <Situation />
       </el-card>
     </el-col>
-  </el-row>
+  </el-row> -->
 </template>
 
 <script setup lang="ts">
@@ -85,11 +85,11 @@ import linklist from "@/components/linklist.vue";
 import alertlist from "@/components/alertlist.vue";
 import userlist from "@/components/userlist.vue";
 import Situation from "@/components/situationlist.vue";
-import useGlobalConfig from '@/composables/useGlobalConfig';
+
 import { fetchNodes, type NodeItem } from '@/api/node'
 import { fetchLinks, type LinkItem} from '@/api/link'
 
-const { useMock } = useGlobalConfig();
+
 
 const stats = computed(() => [
   {

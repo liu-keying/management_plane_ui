@@ -160,7 +160,7 @@
 
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
 import { ElButton, ElDialog, ElTag, ElRow, ElCol, ElCard, ElIcon } from 'element-plus';
@@ -168,19 +168,33 @@ import { Check } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
 import { formatDate, formatBytes, formatPath } from "@/utils/formatters.ts";
 
-import useGlobalConfig from '@/composables/useGlobalConfig';
 import MapView from '@/components/MapView.vue';
 import { fetchLinkDetail, type LinkItem } from '@/api/link';
 import { fetchNodes, type NodeItem } from '@/api/node'
 
-const { useMock } = useGlobalConfig();
 
 const route = useRoute();
 const router = useRouter();
-const link = ref<LinkItem>();
 const nodes = ref<NodeItem[]>([]);
 
-const linkId = route.params.linkId as string;
+const props = defineProps<{
+  linkId: string;
+}>();
+
+const link = ref<LinkItem | null>(null);
+
+watch(() => props.linkId, async (newLinkId) => {
+  if (newLinkId === null) {
+    return;
+  }
+  const linkData = await fetchLinkDetail(newLinkId);
+  
+  if (linkData === null) {
+    ElMessage.error('链路信息不存在或获取失败');
+    return;
+  }
+  link.value = linkData;
+}, { immediate: true });
 
 const points = computed(() => {
   if (!link.value || !link.value.relayIds || !nodes.value.length) {
@@ -203,7 +217,6 @@ const lineConnections = computed(() => {
   for (let i = 0; i < link.value.relayIds.length - 1; i++) {
     connections.push([link.value.relayIds[i], link.value.relayIds[i + 1]]);
   }
-
   return connections;
 });
 
@@ -338,7 +351,10 @@ const goToDelete = () => {
 };
 
 onMounted(async () => {
-  const linkData = await fetchLinkDetail(linkId);
+    if (props.linkId === null) {
+    return;
+  }
+  const linkData = await fetchLinkDetail(props.linkId);
   if (linkData === null) {
     ElMessage.error('链路信息不存在或获取失败');
     goBack();

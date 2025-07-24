@@ -1,7 +1,7 @@
 import axios from 'axios'
-import useGlobalConfig from '@/composables/useGlobalConfig';
+import {useMockConfig} from '@/composables/useGlobalConfig';
 
-const { useMock } = useGlobalConfig();
+const { useMock } = useMockConfig();
 
 export interface LinkItem {
     linkId: string
@@ -31,7 +31,7 @@ export interface FetchLinksParams {
 export const fetchLinks = async (
     params: FetchLinksParams = {}
 ): Promise<LinkItem[]> => {
-    if (useMock) {
+    if (useMock.value === true) {
         const res = await fetch('/mock/links.json')
         return await res.json()
     } else {
@@ -53,7 +53,7 @@ export const fetchLinks = async (
  * @returns 节点详情
  */
 export const fetchLinkDetail = async (linkId: string): Promise<LinkItem | null> => {
-  if (useMock) {
+  if (useMock.value === true) {
     try {
       const res = await fetch('/mock/links.json')
       const data: LinkItem[] = await res.json()

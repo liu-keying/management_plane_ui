@@ -23,23 +23,23 @@ const routes = [
     name: 'Node',
     component: NodeList,
   },
-  { 
-    path: '/node/:nodeId', 
-    name: 'NodeDetail', 
-    component: NodeDetail, 
-    props: true 
-  },
+  // { 
+  //   path: '/node/:nodeId', 
+  //   name: 'NodeDetail', 
+  //   component: NodeDetail, 
+  //   props: true 
+  // },
   {
     path: '/link',
     name: 'Link',
     component: LinkList,
   },
-  { 
-    path: '/link/:linkId', 
-    name: 'LinkDetail', 
-    component: LinkDetail, 
-    props: true 
-  },
+  // { 
+  //   path: '/link/:linkId', 
+  //   name: 'LinkDetail', 
+  //   component: LinkDetail, 
+  //   props: true 
+  // },
   {
     path: '/alert',
     name: 'Alert',
