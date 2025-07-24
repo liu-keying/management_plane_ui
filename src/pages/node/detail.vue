@@ -1,7 +1,7 @@
 <template>
   <div class="node-detail">
     <div v-if="node === null" class="loading-container">
-      <el-empty description="正在加载节点信息..." />
+      <el-empty description="请在左侧选择节点" />
     </div>
     <template v-else>
       <MapView :points="[node]" :lineConnections="[]" />
@@ -100,14 +100,14 @@
             </el-col>
           </el-row>
         </div>
-        <!-- 按钮区域 -->
+      </el-card>
+              <!-- 按钮区域 -->
         <div class="action-buttons">
           <el-button type="primary" @click="openDialog('createRelay')">创建中继节点</el-button>
           <el-button type="warning" @click="openDialog('updateNode')">更新节点信息</el-button>
           <el-button type="danger" @click="openDialog('destroyNode')">销毁节点</el-button>
-          <el-button type="primary" @click="goBack" class="back-button">返回节点列表</el-button>
+          <el-button type="primary" @click="refresh()" class="back-button">刷新</el-button>
         </div>
-      </el-card>
       <!-- 弹窗 -->
       <el-dialog v-model="dialogVisible" :title="dialogTitle" width="400px">
         <template v-if="currentAction === 'updateNode'">
@@ -131,7 +131,7 @@
             </el-form-item>
           </el-form>
         </template>
-        <template v-if="currentAction === 'createRelay'">
+        <template v-else-if="currentAction === 'createRelay'">
           <el-form :model="relayForm" label-width="100px">>
             <el-form-item label="昵称">
               <el-input v-model="relayForm.nickname" />
@@ -159,23 +159,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
 import { ElButton, ElDialog, ElTag, ElRow, ElCol, ElCard } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import { formatDate, formatBytes, formatPercentage } from "@/utils/formatters.ts";
 import { fetchNodeDetail, type NodeItem } from '@/api/node';
-import useGlobalConfig from '@/composables/useGlobalConfig';
+
 
 import MapView from '@/components/MapView.vue';
 
 const router = useRouter();
-const { useMock } = useGlobalConfig();
 
 const goBack = () => {
   router.push('/node');
 };
+
+const refresh = () => {
+  fetchNodeDetail(props.nodeId);
+}
 
 
 // 弹窗控制
@@ -324,9 +327,23 @@ const deleteNode = async () => {
 const route = useRoute();
 
 
-const nodeId = route.params.nodeId as string; // 路由传递节点ID
+const props = defineProps<{
+  nodeId: string;
+}>();
 
 const node = ref<NodeItem | null>(null);
+
+watch(() => props.nodeId, async (newNodeId) => {
+  if (newNodeId === null) {
+    return;
+  }
+  const nodeData = await fetchNodeDetail(newNodeId);
+  if (nodeData === null) {
+    ElMessage.error('节点信息不存在或获取失败');
+    return;
+  }
+  node.value = nodeData;
+}, { immediate: true });
 
 
 
@@ -360,21 +377,27 @@ const roleClass = (role) => {
 
 // 页面加载时获取节点数据
 onMounted(async () => {
-  const nodeData = await fetchNodeDetail(nodeId);
-  if (nodeData === null) {
-    ElMessage.error('节点信息不存在或获取失败');
-    goBack();
-    return;
-  }
-  node.value = nodeData;
+//   const nodeData = await fetchNodeDetail(props.nodeId);
+//   if (nodeData === null) {
+//     ElMessage.error('节点信息不存在或获取失败');
+//     return;
+//   }
+//   node.value = nodeData;
+// 
 });
 
 
 </script>
 
 <style scoped>
+
+.map-view {
+  width: 50%; 
+  height: 300px; 
+}
+
 .node-detail {
-  padding: 20px;
+  padding: 10px;
 
 }
 
@@ -383,7 +406,7 @@ onMounted(async () => {
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   max-width: 1200px;
-  margin: 40px auto;
+  margin: 20px auto;
 }
 
 .title {

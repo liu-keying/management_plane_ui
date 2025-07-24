@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="link-page">
     <MapView :points="nodes" :lineConnections="lineConnections" />
 
@@ -85,20 +85,64 @@
       </template>
     </el-drawer>
   </div>
+</template> -->
+
+<template>
+  <div class="node-container">
+    <div class="sidebar">
+      <!-- 筛选器 -->
+      <div class="filter-bar">
+        <el-input v-model="searchKeyword" placeholder="搜索 节点/状态/策略" clearable class="filter-item search-input">
+        <template #prefix>
+          <el-icon>
+            <Search />
+          </el-icon>
+        </template>
+      </el-input>
+
+      <el-select v-model="selectedPolicy" placeholder="选择策略" clearable class="filter-item">
+        <el-option v-for="policy in policyOptions" :key="policy" :label="policy" :value="policy" />
+      </el-select>
+      <el-select v-model="selectedStatus" placeholder="选择状态" clearable class="filter-item">
+        <el-option v-for="status in statusOptions" :key="status" :label="status" :value="status" />
+      </el-select>
+      </div>
+      <div class="node-items">
+        <div v-for="link in filteredList" :key="link.linkId" class="node-item"
+          :class="{ selected: currentRowKey === link.linkId }" @click="handleCurrentChange(link)">
+          <div class="node-info">
+            <div class="node-id">{{ link.linkId }}</div>
+            <div class="node-details">
+              <!-- <span class="ipaddress">{{ node.ipAddress || 'IP地址未知' }}</span> -->
+              <span class="status" :class="link.status.toLowerCase()">{{ link.status }}</span>
+              <span class="role" :class="link.routingPolicy.toLowerCase()">{{ link.routingPolicy }}</span>
+              <!-- <span class="location">{{ node.geoLocation }}</span> -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+    <div class="node-detail">
+      <detail :linkId="currentRowKey" />
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { ElButton, ElDialog, ElTag, ElRow, ElCol, ElCard, ElIcon, ElMessage, ElSelect, ElOption, ElInput, ElDrawer } from 'element-plus';
-import useGlobalConfig from '@/composables/useGlobalConfig';
+
 import { useRouter } from 'vue-router';
 import MapView from '@/components/MapView.vue';
 import linklist from '@/components/linklist.vue';
 import { fetchLinks, type LinkItem } from '@/api/link';
 import { fetchNodes, type NodeItem } from '@/api/node';
 import { formatPath } from "@/utils/formatters.ts";
+import Detail from './detail.vue';
 
-const { useMock } = useGlobalConfig();
+
 const router = useRouter();
 
 const nodes = ref<NodeItem[]>([])
@@ -113,6 +157,45 @@ const lineConnections = computed(() =>
     .filter((pair): pair is [string, string] => pair !== null)
 );
 
+const currentRowKey = ref<string | null>(null);
+
+// 筛选项
+const selectedStatus = ref('');
+const selectedPolicy = ref('');
+const searchKeyword1 = ref('');
+
+const statusOptions = ['ACTIVE', 'INACTIVE', 'PENDING'];
+const policyOptions = ['RANDOM', 'RECOMMEND', 'SPECIFIED'];
+
+// 筛选逻辑
+const filteredList = computed(() => {
+  return links.value.filter(item => {
+    const keyword = searchKeyword1.value.trim().toLowerCase();
+    const matchKeyword = keyword
+      ? item.linkId.toLowerCase().includes(keyword) ||
+        item.sourceRelayId.toLowerCase().includes(keyword) ||
+        item.status.toLowerCase().includes(keyword) ||
+        item.routingPolicy.toLowerCase().includes(keyword)
+      : true;
+
+    const matchStatus = selectedStatus.value ? item.status === selectedStatus.value : true;
+    const matchPolicy = selectedPolicy.value ? item.routingPolicy === selectedPolicy.value : true;
+
+    return matchKeyword && matchStatus && matchPolicy;
+  });
+});
+
+const selectedNode = ref<LinkItem | null>(null);
+
+const handleCurrentChange = (val: LinkItem | null) => {
+  if (val) {
+    currentRowKey.value = val.linkId;
+    selectedNode.value = val;
+  } else {
+    currentRowKey.value = null;
+    selectedNode.value = null;
+  }
+};
 
 const dialogVisible = ref(false);
 const dialogTitle = ref('');
@@ -237,92 +320,14 @@ onMounted(async () => {
   margin-left: 10px;
 }
 
-.node-list {
-  height: 100%;
+.node-container {
   display: flex;
-  flex-direction: column;
 }
 
-.node-items {
+
+.node-detail {
   flex: 1;
-  overflow-y: auto;
+  padding: 20px;
 }
 
-.node-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  border: 1px solid #e4e7ed;
-  border-radius: 6px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.node-item:hover {
-  background-color: #f5f7fa;
-  border-color: #c0c4cc;
-}
-
-.node-item.selected {
-  background-color: #ecf5ff;
-  border-color: #409EFF;
-}
-
-.node-info {
-  flex: 1;
-}
-
-.node-id {
-  font-weight: bold;
-  font-size: 14px;
-  color: #303133;
-  margin-bottom: 4px;
-}
-
-.node-details {
-  display: flex;
-  gap: 12px;
-  font-size: 12px;
-  color: #606266;
-}
-
-.nickname {
-  color: #409EFF;
-}
-
-.status {
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 11px;
-  font-weight: bold;
-}
-
-.status.online {
-  background-color: #f0f9ff;
-  color: #67c23a;
-}
-
-.status.offline {
-  background-color: #fdf6ec;
-  color: #e6a23c;
-}
-
-.status.destroying {
-  background-color: #fef0f0;
-  color: #f56c6c;
-}
-
-.location {
-  color: #909399;
-}
-
-.selection-indicator {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 </style>

@@ -1,7 +1,15 @@
 import { ref } from 'vue';
 
-const useMock = ref(false); // 切换 true/false 以使用 mock 数据或真实 API
+export const useMockConfig = () => {
+  const useMock = ref(true); // 切换 true/false 以使用 mock 数据或真实 API
+  return {
+    useMock,
+  };
+};
 
-export default function useGlobalConfig() {
-  return { useMock };
-}
+export const useRefreshConfig = () => {
+  const refreshInterval = ref(60); // 默认刷新时间为60秒
+  return {
+    refreshInterval,
+  };
+};
