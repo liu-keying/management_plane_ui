@@ -141,6 +141,7 @@ import { fetchLinks, type LinkItem } from '@/api/link';
 import { fetchNodes, type NodeItem } from '@/api/node';
 import { formatPath } from "@/utils/formatters.ts";
 import Detail from './detail.vue';
+import { Search } from '@element-plus/icons-vue';
 
 
 const router = useRouter();
