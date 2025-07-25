@@ -1,5 +1,9 @@
 <template>
   <div class="link-detail">
+  <div v-if="link === null" class="loading-container">
+      <el-empty description="请在左侧选择链路" />
+    </div>
+    <template v-else>
     <MapView :points="points" :lineConnections="lineConnections" />
     <el-card :body-style="{ padding: '20px' }" class="detail-card">
       <div class="detail-info">
@@ -153,7 +157,7 @@
         </div>
       </template>
     </el-drawer>
-
+</template>
   </div>
 </template>
 
@@ -178,7 +182,7 @@ const router = useRouter();
 const nodes = ref<NodeItem[]>([]);
 
 const props = defineProps<{
-  linkId: string;
+  linkId?: string;
 }>();
 
 const link = ref<LinkItem | null>(null);
@@ -197,13 +201,28 @@ watch(() => props.linkId, async (newLinkId) => {
 }, { immediate: true });
 
 const points = computed(() => {
+  // console.log("=== Points计算开始 ===");
+  // console.log("link.value?.relayIds:", link.value?.relayIds);
+  // console.log("nodes.value.length:", nodes.value.length);
+  
   if (!link.value || !link.value.relayIds || !nodes.value.length) {
+    // console.log("提前返回空数组");
     return [];
   }
 
-  return nodes.value.filter(node =>
-    link.value.relayIds.includes(node.nodeId)
-  );
+  // 将 Proxy 数组转换为普通数组
+  const relayIds = [...link.value.relayIds];
+  // console.log("转换后的 relayIds:", relayIds);
+
+  const result = nodes.value.filter(node => {
+    const isIncluded = relayIds.includes(node.nodeId);
+    // console.log(`节点 ${node.nodeId} 是否匹配: ${isIncluded}`);
+    return isIncluded;
+  });
+  
+  // console.log("最终结果:", result);
+  // console.log("=== Points计算结束 ===");
+  return result;
 });
 
 
