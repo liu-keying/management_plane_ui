@@ -70,13 +70,13 @@ let observer = null;
 
 const lines = ref([]);
 
-const goToNodeDetail = (nodeId) => {
-  router.push(`/node/${nodeId}`);
-};
+// const goToNodeDetail = (nodeId) => {
+//   router.push(`/node/${nodeId}`);
+// };
 
-const goToLinkDetail = (linkId) => {
-  router.push(`/link/${linkId}`);
-};
+// const goToLinkDetail = (linkId) => {
+//   router.push(`/link/${linkId}`);
+// };
 
 const handleDetailClick = () => {
   if (tooltipData.value.type === 'point') {
@@ -139,15 +139,15 @@ const initChart = () => {
 };
 
 // 处理点数据，转换地理位置为坐标
-const processPoints = () => {
-  return props.points.map(p => {
+const processPoints = (points) => {
+  return points.map(p => {
     const coords = p.value || convertGeoLocationToCoords(p.geoLocation);
     return {
       ...p,
       value: coords, // 确保使用转换后的坐标
-      itemStyle: {
-        color: props.selectedNodeIds.includes(p.nodeId) ? '#00C853' : '#FF6F61'
-      }
+      // itemStyle: {
+      //   color: props.selectedNodeIds.includes(p.nodeId) ? '#00C853' : '#FF6F61'
+      // }
     };
   });
 };
@@ -156,8 +156,8 @@ const processPoints = () => {
 const setChartOption = () => {
   if (!worldGraph.value) return;
 
-  const normalPoints = processPoints();
-
+  const normalPoints = processPoints(props.points);
+  const userPoints = processPoints(users);
 
   const selectedPoints = props.points.filter(p => props.selectedNodeIds.includes(p.nodeId));
   const selectedLines = [];
@@ -204,13 +204,40 @@ const setChartOption = () => {
         return '';
       }
     },
+     legend: {
+      data: ['relay', 'user'],
+      // left: 'left',
+      bottom: '10px'
+    },
     series: [
-      {
-        name: 'Points',
+      // {
+      //   name: 'Points',
+      //   type: 'scatter',
+      //   coordinateSystem: 'geo',
+      //   symbolSize: 10,
+      //   data: normalPoints
+      // },
+            {
+        name: 'relay',
         type: 'scatter',
         coordinateSystem: 'geo',
+        symbol: 'circle', // 图标形状
         symbolSize: 10,
-        data: normalPoints
+        data: normalPoints,
+        itemStyle: {
+          color: '#FF6F61'
+        }
+      },
+      {
+        name: 'user',
+        type: 'scatter',
+        coordinateSystem: 'geo',
+        symbol: 'triangle', // 图标形状
+        symbolSize: 10,
+        data: userPoints,
+        itemStyle: {
+          color: '#00C853'
+        }
       },
       {
         name: 'Connections',
@@ -256,7 +283,7 @@ const resizeChart = () => {
 };
 
 const generateLines = () => {
-  const processedPoints = processPoints();
+  const processedPoints = processPoints(props.points);
   lines.value = props.lineConnections.map(([fromId, toId], index) => {
     const from = processedPoints.find(p => p.nodeId === fromId);
     const to = processedPoints.find(p => p.nodeId === toId);
@@ -275,8 +302,8 @@ const generateLines = () => {
 
 onMounted(async () => {
   generateLines();
-  console.log('props.points', props.points);
-  console.log('props.lineConnections', props.lineConnections);
+  // console.log('props.points', props.points);
+  // console.log('props.lineConnections', props.lineConnections);
   await nextTick();
   initChart();
 
@@ -470,6 +497,14 @@ const locationMap = {
   "Cranbrook": [-115.7681, 49.5122]
 };
 
+const users = [
+  { name: "test1", geoLocation: "Chilliwack" },
+  { name: "user2", geoLocation: "Guangzhou" },
+  { name: "user3", geoLocation: "Shenzhen" },
+  { name: "test4", geoLocation: "Hangzhou" },
+  { name: "test5", geoLocation: "Zhengzhou" },
+]
+
 </script>
 
 
@@ -477,7 +512,7 @@ const locationMap = {
 <style scoped>
 #worldgraph {
   width: 100%;
-  height: 400px;
+  height: 600px;
   position: relative;
 }
 

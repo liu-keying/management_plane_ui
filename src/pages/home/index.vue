@@ -1,9 +1,7 @@
 <template>
-  <el-row :gutter="20" class="top-row">
-    <el-col :span="18">
-      <!-- <el-card class="tall-card"> -->
+  <el-row :gutter="20"  style="height: 600px;">
+    <el-col :span="18" style="height: 600px;">
       <MapView :points="nodes" :lineConnections='lineConnections' />
-      <!-- </el-card> -->
     </el-col>
     <el-col :span="6">
       <el-card class="overview-card">
