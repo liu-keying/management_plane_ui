@@ -1,9 +1,8 @@
 <template>
-  <el-row :gutter="20"  style="height: 600px;">
-    <el-col :span="18" style="height: 600px;">
-      <MapView :points="nodes" :lineConnections='lineConnections' />
-    </el-col>
-    <el-col :span="6">
+  <!-- <el-row :gutter="20" style="height: 600px; display: flex; justify-content: center;"> -->
+  <MapView :points="nodes" :lineConnections='lineConnections' />
+<!-- </el-row> -->
+    <!-- <el-col :span="6">
       <el-card class="overview-card">
         <template #header>
           <div class="card-header">
@@ -20,8 +19,8 @@
           </el-col>
         </el-row>
       </el-card>
-    </el-col>
-  </el-row>
+    </el-col> -->
+  <!-- </el-row> -->
 
   <!-- <el-row :gutter="20" class="bottom-row" style="margin-top: 20px;">
     <el-col :span="12">

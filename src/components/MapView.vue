@@ -89,22 +89,22 @@ const handleDetailClick = () => {
 // 将geoLocation转换为坐标
 const convertGeoLocationToCoords = (geoLocation) => {
   if (!geoLocation) return [116.4074, 39.9042]; // 默认北京坐标
-  
+
   // 直接匹配
   if (locationMap[geoLocation]) {
     return locationMap[geoLocation];
   }
-  
+
   // 模糊匹配
-  const fuzzyMatch = Object.keys(locationMap).find(key => 
-    key.toLowerCase().includes(geoLocation.toLowerCase()) || 
+  const fuzzyMatch = Object.keys(locationMap).find(key =>
+    key.toLowerCase().includes(geoLocation.toLowerCase()) ||
     geoLocation.toLowerCase().includes(key.toLowerCase())
   );
-  
+
   if (fuzzyMatch) {
     return locationMap[fuzzyMatch];
   }
-  
+
   // 如果都没匹配到，返回默认坐标
   console.warn(`未找到地理位置 "${geoLocation}" 的坐标，使用默认坐标`);
   return [116.4074, 39.9042]; // 默认北京坐标
@@ -204,7 +204,7 @@ const setChartOption = () => {
         return '';
       }
     },
-     legend: {
+    legend: {
       data: ['relay', 'user'],
       // left: 'left',
       bottom: '10px'
@@ -217,26 +217,42 @@ const setChartOption = () => {
       //   symbolSize: 10,
       //   data: normalPoints
       // },
-            {
+      {
         name: 'relay',
         type: 'scatter',
         coordinateSystem: 'geo',
-        symbol: 'circle', // 图标形状
+        symbol: 'circle',
         symbolSize: 10,
         data: normalPoints,
         itemStyle: {
-          color: '#FF6F61'
+          color: '#FF6F61',
+          shadowBlur: 10,
+          shadowColor: '#FF6F61'
+        },
+        emphasis: {
+          itemStyle: {
+            borderColor: '#fff',
+            borderWidth: 2
+          }
         }
       },
       {
         name: 'user',
         type: 'scatter',
         coordinateSystem: 'geo',
-        symbol: 'triangle', // 图标形状
+        symbol: 'circle',
         symbolSize: 10,
         data: userPoints,
         itemStyle: {
-          color: '#00C853'
+          color: '#00C853',
+          shadowBlur: 10,
+          shadowColor: '#00C853'
+        },
+        emphasis: {
+          itemStyle: {
+            borderColor: '#fff',
+            borderWidth: 2
+          }
         }
       },
       {
@@ -252,8 +268,8 @@ const setChartOption = () => {
         lineStyle: {
           color: '#2196F3',
           width: 2,
-          opacity: 0.7,
-          curveness: 0
+          opacity: 0.8,
+          curveness: 0.2
         },
         data: lines.value
       },
@@ -350,7 +366,7 @@ const locationMap = {
   "Zhengzhou": [113.6254, 34.7466],
   "Jinan": [117.0009, 36.6758],
   "Hong Kong": [114.1620, 22.2810],
-    // 国外主要城市
+  // 国外主要城市
   "New York": [-74.0060, 40.7128],
   "London, UK": [-0.1276, 51.5074],
   "Tokyo": [139.6503, 35.6762],
