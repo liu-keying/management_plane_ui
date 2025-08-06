@@ -34,7 +34,7 @@ export default {
                     backgroundColor: '#11367a',
                     textStyle: {
                         color: '#6dd0e3',
-                        fontSize: 11,
+                        fontSize: 9,
                     },
                     formatter: (params) => {
                         // console.log(params);
@@ -84,7 +84,7 @@ export default {
                     axisLabel: {
                         show: true,
                         margin: 13,
-                        fontSize: 11,
+                        fontSize: 9,
                         color: '#75deef'
                     },
                     data: this.data.linkIds
@@ -144,8 +144,17 @@ export default {
                             show: true,
                             position: 'right',
                             color: '#75deef',
-                            fontSize: 11,
-                            formatter: '{c}KB'
+                            fontSize: 9,
+                            formatter: function (params) {
+                                // 确保数值显示完整，并添加KB单位
+                                return params.value + 'KB';
+                            },
+                            distance: 0,  // 调整标签与图形的距离
+                            align: 'left', // 文字对齐方式
+                            verticalAlign: 'middle', // 垂直对齐方式
+                            padding: [2, 4, 2, 4], // 文字内边距
+                            backgroundColor: 'rgba(0,0,0,0.1)', // 添加半透明背景
+                            borderRadius: 2, // 文字背景圆角
                         },
                         data: this.data.value
                     },
@@ -176,7 +185,7 @@ export default {
 <style lang="less" scoped>
 .webBar {
     float: left;
-    width: 90%;
+    width: 95%;
     height: 100%;
 }
 </style>

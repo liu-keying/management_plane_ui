@@ -219,6 +219,7 @@ export default {
         this.resizeFn = this.$debounce(() => {
             this.$refs.node_status.setChart();
             this.$refs.link_status.setChart();
+            this.$refs.traffic_rank.setChart();
             this.$refs.worldMap.setChart();
 
         }, 500)

@@ -1,63 +1,53 @@
 <template>
     <div style="height:100%;">
         <div class="header">
+            <div class="header-title">
+                GRN管理平台
+            </div>
             <div class="selectRange">
-                <Menu mode="horizontal" @on-select="(name) =>$route.name !== name && $router.push(name)" :active-name="$route.name">
+                <Menu mode="horizontal" @on-select="(name) => $route.name !== name && $router.push(name)"
+                    :active-name="$route.name">
                     <MenuItem name="dashboard">
-                        首页
+                    首页
                     </MenuItem>
-                    <MenuItem name="page1">
-                        page1
+                    <MenuItem name="nodes">
+                    节点管理
                     </MenuItem>
-                    <MenuItem name="page2">
-                        page2
+                    <MenuItem name="links">
+                    链路管理
                     </MenuItem>
-                    <MenuItem name="page3">
-                        page3
+                    <MenuItem name="users">
+                    用户管理
                     </MenuItem>
-                   <MenuItem name="page4">
-                        page4
+                    <MenuItem name="alert">
+                    风险告警
                     </MenuItem>
                 </Menu>
             </div>
-            <div class="header-title">
-                大数据可视化平台
-            </div>
+
             <div class="selectRange">
                 <Menu mode="horizontal" @on-select="handleSelect" :active-name="activeName">
-                    <MenuItem name="day">
-                        昨日
-                    </MenuItem>
-                    <MenuItem name="week">
-                        近一周
-                    </MenuItem>
-                    <MenuItem name="month">
-                        近一月
-                    </MenuItem>
                     <Submenu name="4">
                         <template slot="title">
-                            <Icon type="ios-settings-outline" size="24" color="#60C2D4"/>
+                            <Icon type="ios-settings-outline" size="24" color="#60C2D4" />
                         </template>
-                        <MenuItem name="filter">筛选</MenuItem>
+                        <MenuItem name="filter">设置刷新间隔</MenuItem>
                     </Submenu>
 
                 </Menu>
             </div>
         </div>
-        <Modal
-            v-model="modal"
-            title="选择时间"
-            :mask-closable="false"
-            @on-ok="getMonthBetween(startTime,endTime)"
-        >
+        <Modal v-model="modal" title="选择时间" :mask-closable="false" @on-ok="getMonthBetween(startTime, endTime)">
             <DatePicker @on-change="pickStartDate" :options="optionStart" type="date" placeholder="选择开始日期"
-                        style="width: 200px"></DatePicker>
+                style="width: 200px">
+            </DatePicker>
             <span style="padding:0 20px;color:#75deef">至</span>
             <DatePicker @on-change="pickEndDate" :options="optionEnd" type="date" placeholder="选择结束日期"
-                        style="width: 200px"></DatePicker>
+                style="width: 200px">
+            </DatePicker>
         </Modal>
         <div class="page">
-            <router-view v-if="flag" :selectRangeDate='selectRangeDate'></router-view>
+            <router-view v-if="flag" ></router-view>
         </div>
 
     </div>
@@ -185,19 +175,23 @@ export default {
                 border: 1px solid #1a3c58;
                 color: #75deef;
 
-                &::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+                &::-webkit-input-placeholder {
+                    /* WebKit, Blink, Edge */
                     color: #75deef;
                 }
 
-                &::-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+                &::-moz-placeholder {
+                    /* Mozilla Firefox 4 to 18 */
                     color: #75deef;
                 }
 
-                &::-moz-placeholder { /* Mozilla Firefox 19+ */
+                &::-moz-placeholder {
+                    /* Mozilla Firefox 19+ */
                     color: #75deef;
                 }
 
-                &::-ms-input-placeholder { /* Internet Explorer 10-11 */
+                &::-ms-input-placeholder {
+                    /* Internet Explorer 10-11 */
                     color: #75deef;
                 }
             }
@@ -255,7 +249,7 @@ export default {
 }
 
 .header {
-    height: 80px;
+    height: 50px;
     background: #03044A;
     display: flex;
     justify-content: space-between;
@@ -282,7 +276,8 @@ export default {
 
             }
 
-            .ivu-menu-item, .ivu-menu-submenu {
+            .ivu-menu-item,
+            .ivu-menu-submenu {
                 color: #75deef;
 
                 &:hover {
@@ -292,7 +287,9 @@ export default {
 
             .ivu-select-dropdown {
                 background: #09102E;
-
+                right: 0;
+                left: auto;
+                //transform: translateX(-20px);
                 .ivu-menu-item {
                     color: #75deef;
 

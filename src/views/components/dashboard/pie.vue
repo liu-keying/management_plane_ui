@@ -39,7 +39,7 @@ export default {
                         center: ['50%', '50%'],
                         label: {
                             color: '#75deef',
-                            fontSize: 11,
+                            fontSize: 9,
                             formatter: function (data) {
                                 return data.data.name + ': ' + data.data.value
                             }

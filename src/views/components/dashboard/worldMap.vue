@@ -98,7 +98,7 @@ export default {
                     backgroundColor: '#11367a',
                     textStyle: {
                         color: '#6dd0e3',
-                        fontSize: 15,
+                        fontSize: 9,
                     },
                     formatter: function (params) {
                         //console.log('Tooltip params:', params);
@@ -154,7 +154,7 @@ export default {
                     itemHeight: 7,
                     textStyle: {
                         color: '#75deef',
-                        fontSize: 12
+                        fontSize: 9
                     }
                 },
                 // grid:
@@ -197,18 +197,18 @@ export default {
                     {
                         type: 'lines',
                         coordinateSystem: 'geo',
-                        zlevel: 2,
+                        // zlevel: 2,
                         effect: {
                             show: true,
                             symbol: 'arrow',
                             period: 5,
                             // trailLength: 0.7,
                             color: '#fff',
-                            symbolSize: 8
+                            symbolSize: 4
                         },
                         lineStyle: {
                             color: '#fff',
-                            width: 3,
+                            width: 1.5,
                         },
                         data: processedLinks
                     },
@@ -217,7 +217,7 @@ export default {
                         type: 'effectScatter',
                         coordinateSystem: 'geo',
                         data: processedNodes.filter(node => node.role === 'VPS_DA'),
-                        symbolSize: 9,
+                        symbolSize: 5,
                         label: {
                             show: false
                         },
@@ -236,7 +236,7 @@ export default {
                         type: 'effectScatter',
                         coordinateSystem: 'geo',
                         data: processedNodes.filter(node => node.role === 'VPS_RELAY'),
-                        symbolSize: 9,
+                        symbolSize: 5,
                         label: {
                             show: false
                         },
@@ -255,7 +255,7 @@ export default {
                         type: 'effectScatter',
                         coordinateSystem: 'geo',
                         data: processedNodes.filter(node => node.role === 'CLIENT'),
-                        symbolSize: 9,
+                        symbolSize: 5,
                         label: {
                             show: false
                         },

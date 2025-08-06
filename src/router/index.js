@@ -20,7 +20,26 @@ const router = new Router({
                     name: 'dashboard',
                     component: () => import('@/views/dashboard')
                 },
-                
+                {
+                    path: '/nodes',
+                    name: 'nodes',
+                    component: () => import('@/views/nodes')
+                },
+                {
+                    path: '/links',
+                    name: 'links',
+                    component: () => import('@/views/links')
+                },
+                {
+                    path: '/users',
+                    name: 'users',
+                    component: () => import('@/views/users')
+                },
+                {
+                    path: '/alert',
+                    name: 'alert',
+                    component: () => import('@/views/alert')
+                },
             ]
         }
     ]
