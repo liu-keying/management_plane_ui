@@ -20,8 +20,9 @@
                         <div class="item-id">{{ node.nodeId }}</div>
                         <div class="item-detail">
                             <span class="item-text">{{ node.ipAddress || 'IP地址未知' }}</span>
-                            <Tag :color="getStatusColor(node.status)" class="item-tag">{{ node.status }}</Tag>
-                            <Tag :color="getRoleColor(node.role)" class="item-tag">{{ node.role }}</Tag>
+                            <span :class="['item-text', 'status-' + node.status.toLowerCase()]">{{ node.status }}</span>
+                            <span :class="['item-text', 'role-' + node.role.toLowerCase()]">{{ node.role }}</span>
+
                             <span class="item-text">{{ node.geoLocation }}</span>
                         </div>
                     </div>
@@ -92,17 +93,17 @@ export default {
         },
         getStatusColor(status) {
             const colorMap = {
-                'ONLINE': 'success',
-                'OFFLINE': 'error',
-                'DESTROYING': 'warning'
+                'ONLINE': 'green',
+                'OFFLINE': 'orange',
+                'DESTROYING': 'red'
             };
             return colorMap[status] || 'default';
         },
         getRoleColor(role) {
             const colorMap = {
-                'CLIENT': 'blue',
-                'VPS_RELAY': 'green',
-                'VPS_DA': 'purple'
+                'CLIENT': 'green',
+                'VPS_RELAY': 'orange',
+                'VPS_DA': 'yellow'
             };
             return colorMap[role] || 'default';
         }
@@ -111,118 +112,237 @@ export default {
 </script>
 
 
-<style scoped>
+<style lang="less" scoped>
+@primary-color: #75deef;
+@border-color: #2b3a57;
+@bg-primary: #03044A;
+@bg-secondary: rgba(117, 222, 239, 0.2);
+@text-primary: #6EDDF1;
+@text-secondary: #75deef;
+@text-white: #fff;
+@hover-bg: rgba(117, 222, 239, 0.1);
+@selected-bg: rgba(117, 222, 239, 0.3);
+
 .manage-page {
     display: flex;
-    height: calc(100vh - 50px);
-    background: #03044A;
+    height: calc(100vh - 65px);
+    background: @bg-primary;
+
+    .sidebar {
+        width: 40%;
+        background: @bg-primary;
+        // border-right: 1px solid @border-color;
+        padding: 16px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+
+        .filter-bar {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+            margin-bottom: 10px;
+            padding-right: 10px;
+            //padding-bottom: 16px;
+            // border-bottom: 1px solid @border-color;
+
+            .filter-item {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .search-input {
+                flex: 2;
+                min-width: 0;
+            }
+        }
+
+        .item-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 8px;
+
+            // 自定义滚动条样式
+            &::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            &::-webkit-scrollbar-track {
+                background: rgba(42, 62, 101, 0.284);
+                border-radius: 3px;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: @primary-color;
+                border-radius: 3px;
+
+                &:hover {
+                    background: lighten(@primary-color, 10%);
+                }
+            }
+
+            .list-item {
+                padding: 12px;
+                border: 1px solid @border-color;
+                border-radius: 4px;
+                margin-bottom: 8px;
+                cursor: pointer;
+                transition: all 0.3s;
+                background: @bg-secondary;
+
+                &:hover {
+                    border-color: @primary-color;
+                    box-shadow: 0 2px 12px rgba(117, 222, 239, 0.2);
+                    background: @hover-bg;
+                }
+
+                &.selected {
+                    border-color: @primary-color;
+                    background: @selected-bg;
+                    box-shadow: 0 4px 16px rgba(117, 222, 239, 0.3);
+                }
+
+                .item-info {
+                    width: 100%;
+
+                    .item-id {
+                        font-size: 16px;
+                        font-weight: 600;
+                        color: @text-primary;
+                        margin-bottom: 8px;
+                        text-shadow: 0 0 8px rgba(117, 222, 239, 0.3);
+                    }
+
+                    .item-detail {
+                        display: flex;
+                        flex-direction: row;
+                        gap: 8px;
+                        align-items: center;
+                        flex-wrap: wrap;
+
+                        .item-text {
+                            font-size: 12px;
+                            color: @text-secondary;
+                            white-space: nowrap;
+                            font-family: 'Courier New', monospace;
+
+                            // 状态颜色
+                            &.status-online {
+                                color: #52c41a;
+                                font-weight: 600;
+                            }
+
+                            &.status-offline {
+                                color: #ff4d4f;
+                                font-weight: 600;
+                            }
+
+                            &.status-destroying {
+                                color: #faad14;
+                                font-weight: 600;
+                            }
+
+                            // 角色颜色
+                            &.role-client {
+                                color: #ffec18;
+                                font-weight: 600;
+                            }
+
+                            &.role-vps_relay {
+                                color: #f79336;
+                                font-weight: 600;
+                            }
+
+                            &.role-vps_da {
+                                color: #ffec18;
+                                font-weight: 600;
+                            }
+                        }
+
+                        .item-tag {
+                            margin: 0;
+                            flex-shrink: 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .detail {
+        flex: 1;
+        padding: 20px;
+        background: @bg-primary;
+        //margin-left: 16px;
+        margin-bottom: 8px;
+        margin-right: 8px;
+        border-radius: 4px;
+        border: 1px solid @border-color;
+        position: relative;
+
+        
+    }
 }
 
-.sidebar {
-    width: 40%;
-    background: #fff;
-    border-right: 1px solid #e8eaec;
-    padding: 16px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+/* iView组件样式覆盖 - 科技风格 */
+/deep/ .ivu-input {
+    background: @bg-secondary !important;
+    border: 1px solid @primary-color !important;
+    color: @text-primary !important;
+
+    &:focus {
+        border-color: @primary-color !important;
+        box-shadow: 0 0 8px rgba(117, 222, 239, 0.4) !important;
+    }
+
+    &::placeholder {
+        color: rgba(117, 222, 239, 0.6) !important;
+    }
 }
 
-.detail {
-    flex: 1;
-    padding: 20px;
-    background: #fff;
-    margin-left: 16px;
-    border-radius: 4px;
+/deep/ .ivu-select {
+    .ivu-select-selection {
+        background: @bg-secondary !important;
+        border: 1px solid @primary-color !important;
+        color: @text-primary !important;
+
+        &:hover {
+            border-color: @primary-color !important;
+        }
+    }
+
+    .ivu-select-placeholder {
+        color: rgba(117, 222, 239, 0.6) !important;
+    }
+
+    .ivu-select-arrow {
+        color: @text-secondary !important;
+    }
 }
 
-.filter-bar {
-    display: flex;
-    flex-direction: row;
-    gap: 12px;
-    margin-bottom: 16px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #e8eaec;
+/deep/ .ivu-select-dropdown {
+    background: rgb(21, 20, 86) !important;
+    border: 1px solid @primary-color !important;
+    box-shadow: 0 4px 20px rgba(3, 4, 74, 0.8) !important;
+
+    .ivu-select-item {
+        color: @text-primary !important;
+
+        &:hover {
+            background: @hover-bg !important;
+        }
+         &.ivu-select-item-selected {
+            background: rgba(117, 222, 239, 0.15) !important;
+            color: @primary-color !important;
+        }
+    }
 }
 
-.filter-item {
-    flex: 1;
-    min-width: 0;
-}
-
-.search-input {
-    flex: 2;
-    min-width: 0;
-}
-
-
-.item-list {
-    flex: 1;
-    overflow-y: auto;
-}
-
-.list-item {
-    padding: 12px;
-    border: 1px solid #e8eaec;
-    border-radius: 4px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: #fff;
-}
-
-.list-item:hover {
-    border-color: #2d8cf0;
-    box-shadow: 0 2px 8px rgba(45, 140, 240, 0.1);
-}
-
-.list-item.selected {
-    border-color: #2d8cf0;
-    background: #f0f8ff;
-    box-shadow: 0 2px 8px rgba(45, 140, 240, 0.15);
-}
-
-.item-info {
-    width: 100%;
-}
-
-.item-id {
-    font-size: 16px;
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 8px;
-}
-
-.item-detail {
-    display: flex;
-    flex-direction: row;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.item-text {
-    font-size: 12px;
-    color: #999;
-    white-space: nowrap;
-}
-
-.item-tag {
-    margin: 0;
-    flex-shrink: 0;
-}
-
-/* iView组件样式调整 */
-.ivu-input-wrapper {
-    margin-bottom: 0;
-}
-
-.ivu-select {
-    width: 100%;
-}
-
-.ivu-tag {
-    font-size: 11px;
-    border-radius: 2px;
+/deep/ .ivu-tag {
+    background: rgba(117, 222, 239, 0.2) !important;
+    border: 1px solid rgba(117, 222, 239, 0.4) !important;
+    color: @text-primary !important;
+    font-size: 10px;
+    border-radius: 3px;
 }
 </style>

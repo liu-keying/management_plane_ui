@@ -249,7 +249,7 @@ export default {
 }
 
 .header {
-    height: 50px;
+    height: 65px;
     background: #03044A;
     display: flex;
     justify-content: space-between;
@@ -315,7 +315,7 @@ export default {
 }
 
 .page {
-    height: calc(~ '100% - 80px');
+    height: calc(~ '100% - 65px');
 
 }
 </style>
