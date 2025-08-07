@@ -17,19 +17,40 @@ export default {
             type: Array,
             default: () => []
         },
-        users: {
-            type: Array,
-            default: () => []
+        //users: {
+        //    type: Array,
+        //    default: () => []
+        //},
+        showLegend: {
+            type: Boolean,
+            default: false
+        },
+        enableRoam: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
         return {
-            myChart: null
+            myChart: null,
+            mapSize: { width: 0, height: 0 }
         }
     },
     methods: {
         setChart() {
             // console.log('setChart');
+            // 获取容器实际尺寸
+            const containerWidth = this.$el.clientWidth;
+            const containerHeight = this.$el.clientHeight;
+            this.mapSize = { width: containerWidth, height: containerHeight };
+
+            // 基于容器尺寸计算缩放因子
+            const baseWidth = 800;
+            const baseHeight = 440;
+            const widthScale = containerWidth / baseWidth;
+            const heightScale = containerHeight / baseHeight;
+            const sizeScale = Math.min(widthScale, heightScale);
+
             // 处理点数据，转换地理位置为坐标
             var processPoints = function (points) {
                 return points.map(p => {
@@ -145,6 +166,7 @@ export default {
 
                 ],
                 legend: {
+                    show: this.showLegend,
                     orient: 'horizontal',
                     top: '5%',
                     right: '5%',
@@ -172,7 +194,7 @@ export default {
                     left: '8%',
                     right: '8%',
                     bottom: '15%',
-                    roam: true,
+                    roam: this.enableRoam,
                     scaleLimit: {
                         min: 1,
                         max: 5
@@ -204,11 +226,11 @@ export default {
                             period: 5,
                             // trailLength: 0.7,
                             color: '#fff',
-                            symbolSize: 4
+                            symbolSize: Math.max(2, 4 * sizeScale)
                         },
                         lineStyle: {
                             color: '#fff',
-                            width: 1.5,
+                            width: Math.max(0.8, 1.5 * sizeScale),
                         },
                         data: processedLinks
                     },
@@ -217,7 +239,7 @@ export default {
                         type: 'effectScatter',
                         coordinateSystem: 'geo',
                         data: processedNodes.filter(node => node.role === 'VPS_DA'),
-                        symbolSize: 5,
+                        symbolSize: Math.max(3, 5 * sizeScale),
                         label: {
                             show: false
                         },
@@ -236,7 +258,7 @@ export default {
                         type: 'effectScatter',
                         coordinateSystem: 'geo',
                         data: processedNodes.filter(node => node.role === 'VPS_RELAY'),
-                        symbolSize: 5,
+                        symbolSize: Math.max(3, 5 * sizeScale),
                         label: {
                             show: false
                         },
@@ -255,7 +277,7 @@ export default {
                         type: 'effectScatter',
                         coordinateSystem: 'geo',
                         data: processedNodes.filter(node => node.role === 'CLIENT'),
-                        symbolSize: 5,
+                        symbolSize: Math.max(3, 5 * sizeScale),
                         label: {
                             show: false
                         },

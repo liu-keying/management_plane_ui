@@ -1,8 +1,11 @@
 <template>
     <div style="height:100%;">
         <div class="header">
-            <div class="header-title">
-                GRN管理平台
+            <div class="header-left">
+                <img src="@/assets/images/logo.png" class="logo" />
+                <div class="header-title">
+                    GRN管理平台
+                </div>
             </div>
             <div class="selectRange">
                 <Menu mode="horizontal" @on-select="(name) => $route.name !== name && $router.push(name)"
@@ -47,7 +50,7 @@
             </DatePicker>
         </Modal>
         <div class="page">
-            <router-view v-if="flag" ></router-view>
+            <router-view v-if="flag"></router-view>
         </div>
 
     </div>
@@ -196,6 +199,41 @@ export default {
                 }
             }
 
+            .ivu-select {
+                .ivu-select-selection {
+                    background: rgba(0, 0, 0, 0);
+                    border: 1px solid #1a3c58;
+                    color: #75deef;
+
+                    // &:hover {
+                    //     border-color: #75deef;
+                    // }
+                }
+
+                .ivu-select-placeholder {
+                    color: #75deef;
+                }
+            }
+
+            .ivu-select-dropdown {
+                background: #071332;
+                border: 1px solid #1a3c58;
+                box-shadow: 0 8px 32px rgba(3, 4, 74, 0.8);
+
+                .ivu-select-item {
+                    color: #75deef;
+
+                    &:hover {
+                        background: #091941;
+                    }
+
+                    &.ivu-select-item-selected {
+                        background: #091941;
+                        color: #75deef;
+                    }
+                }
+            }
+
             .ivu-picker-panel-body {
                 background: #071332;
 
@@ -255,10 +293,16 @@ export default {
     justify-content: space-between;
     align-items: center;
 
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 15px; // 控制logo和标题之间的距离
+    }
+
     &-title {
-        color: #75deef;
-        font-size: 30px;
-        letter-spacing: 10px;
+        color: #fff;
+        font-size: 28px;
+        letter-spacing: 5px;
     }
 
     .selectRange {
@@ -289,6 +333,7 @@ export default {
                 background: #09102E;
                 right: 0;
                 left: auto;
+
                 //transform: translateX(-20px);
                 .ivu-menu-item {
                     color: #75deef;

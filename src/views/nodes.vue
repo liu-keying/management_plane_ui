@@ -3,7 +3,7 @@
         <div class="sidebar">
             <!-- 筛选器 -->
             <div class="filter-bar">
-                <Input v-model="searchKeyword" placeholder="搜索 ID / 昵称 / IP地址 / 云服务商" clearable
+                <Input v-model="searchKeyword" placeholder="搜索 ID / IP地址 " clearable
                     class="filter-item search-input" icon="ios-search">
                 </Input>
                 <Select v-model="selectedRole" placeholder="选择角色" clearable class="filter-item">
@@ -22,8 +22,7 @@
                             <span class="item-text">{{ node.ipAddress || 'IP地址未知' }}</span>
                             <span :class="['item-text', 'status-' + node.status.toLowerCase()]">{{ node.status }}</span>
                             <span :class="['item-text', 'role-' + node.role.toLowerCase()]">{{ node.role }}</span>
-
-                            <span class="item-text">{{ node.geoLocation }}</span>
+                            <span class="item-text">{{ node.geoLocation || '地理位置未知' }}</span>
                         </div>
                     </div>
 
@@ -42,6 +41,7 @@ import { fetchNodes } from '@/api/node.js';
 import { defaultFormatter } from '@/lib/formatters.js';
 
 const Detail = () => import('./components/nodes/detail');
+
 
 export default {
     name: 'NodeManagement',
@@ -62,6 +62,8 @@ export default {
     },
     computed: {
         filteredList() {
+            this.currentRowKey = null;
+            this.selectedNode = null;
             return this.nodes.filter(item => {
                 const matchRole = this.selectedRole ? item.role === this.selectedRole : true;
                 const matchStatus = this.selectedStatus ? item.status === this.selectedStatus : true;
@@ -83,30 +85,36 @@ export default {
     },
     methods: {
         handleCurrentChange(val) {
-            if (val) {
+            // 如果点击的是当前已选中的节点，则取消选中
+            if (val && this.currentRowKey === val.nodeId) {
+                this.currentRowKey = null;
+                this.selectedNode = null;
+            } else if (val) {
+                // 选中新节点
                 this.currentRowKey = val.nodeId;
                 this.selectedNode = val;
             } else {
+                // 清空选中
                 this.currentRowKey = null;
                 this.selectedNode = null;
             }
         },
-        getStatusColor(status) {
-            const colorMap = {
-                'ONLINE': 'green',
-                'OFFLINE': 'orange',
-                'DESTROYING': 'red'
-            };
-            return colorMap[status] || 'default';
-        },
-        getRoleColor(role) {
-            const colorMap = {
-                'CLIENT': 'green',
-                'VPS_RELAY': 'orange',
-                'VPS_DA': 'yellow'
-            };
-            return colorMap[role] || 'default';
-        }
+        // getStatusColor(status) {
+        //     const colorMap = {
+        //         'ONLINE': 'green',
+        //         'OFFLINE': 'orange',
+        //         'DESTROYING': 'red'
+        //     };
+        //     return colorMap[status] || 'default';
+        // },
+        // getRoleColor(role) {
+        //     const colorMap = {
+        //         'CLIENT': 'green',
+        //         'VPS_RELAY': 'orange',
+        //         'VPS_DA': 'yellow'
+        //     };
+        //     return colorMap[role] || 'default';
+        // }
     }
 };
 </script>
@@ -129,13 +137,14 @@ export default {
     background: @bg-primary;
 
     .sidebar {
-        width: 40%;
+        width: 33%;
         background: @bg-primary;
         // border-right: 1px solid @border-color;
         padding: 16px;
         overflow: hidden;
         display: flex;
         flex-direction: column;
+        border-top: 1px solid @border-color;
 
         .filter-bar {
             display: flex;
@@ -244,7 +253,7 @@ export default {
 
                             // 角色颜色
                             &.role-client {
-                                color: #ffec18;
+                                color: #18ffbe;
                                 font-weight: 600;
                             }
 
@@ -271,7 +280,7 @@ export default {
 
     .detail {
         flex: 1;
-        padding: 20px;
+        padding: 5px;
         background: @bg-primary;
         //margin-left: 16px;
         margin-bottom: 8px;
@@ -279,8 +288,6 @@ export default {
         border-radius: 4px;
         border: 1px solid @border-color;
         position: relative;
-
-        
     }
 }
 
@@ -331,7 +338,8 @@ export default {
         &:hover {
             background: @hover-bg !important;
         }
-         &.ivu-select-item-selected {
+
+        &.ivu-select-item-selected {
             background: rgba(117, 222, 239, 0.15) !important;
             color: @primary-color !important;
         }

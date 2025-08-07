@@ -2,7 +2,7 @@
     <Row class="page">
         <Col :span="18" style="padding:0 1%;">
         <div class="center-top">
-            <world-map ref="worldMap" :nodes="nodes" :links="links" :users="users"></world-map>
+            <world-map ref="worldMap" :nodes="nodes" :links="links" :show-legend="true" :enable-roam="true"></world-map>
         </div>
         </Col>
         <Col :span="6">
@@ -44,7 +44,7 @@
 import { fetchNodes } from '@/api/node.js'
 import { fetchLinks } from '@/api/link.js'
 
-const worldMap = () => import('./components/dashboard/worldMap');
+const worldMap = () => import('./components/worldMap');
 const pie = () => import('./components/dashboard/pie');
 const bar = () => import('./components/dashboard/bar');
 
@@ -263,29 +263,7 @@ export default {
             float: left;
         }
 
-        .circular {
-            height: 100%;
-
-            .canvas {
-                height: 100%;
-                width: 30%;
-                float: left;
-
-                .subtitle {
-                    font-size: 12px;
-                    font-weight: bold;
-                    color: #fff;
-                    height: 25px;
-                    padding: 10px 0;
-                    text-align: center;
-                }
-
-                .canvasList {
-                    height: calc(~'100% - 25px');
-                    text-align: center
-                }
-            }
-        }
+        
 
         .left1 {
             border-bottom: 1px solid #0D2451;

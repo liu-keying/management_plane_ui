@@ -24,7 +24,7 @@ export default {
         },
         // 网站
         setChart() {
-            console.log(this.data);
+            //console.log(this.data);
             let option = {
                 tooltip: {
                     trigger: 'axis',
