@@ -17,7 +17,7 @@
                         <world-map ref="worldMap" :nodes="[node]"></world-map>
                     </div>
                     <div class="action-buttons">
-                        <Button @click="openDialog('createRelay')">创建Relay</Button>
+                        <Button @click="openDialog('createRelay')">创建中继</Button>
                         <Button @click="openDialog('updateRole')">更新节点角色</Button>
                         <Button @click="openDialog('updateStatus')">更新节点状态</Button>
                         <Button @click="openDialog('destroyNode')">销毁节点</Button>
@@ -101,19 +101,19 @@
                                 </div>
 
                                 <div class="info-item">
-                                    <span class="label">最大Relay容量:</span>
+                                    <span class="label">最大中继容量:</span>
                                     <span>{{ node.maxRelayCapacity }}</span>
                                 </div>
                                 <div class="info-item">
-                                    <span class="label">Relay数量:</span>
+                                    <span class="label">中继数量:</span>
                                     <span>{{ node.relayCount }}</span>
                                 </div>
                                 <div class="info-item">
-                                    <span class="label">匿名网RelayID:</span>
+                                    <span class="label">匿名网络中继ID:</span>
                                     <span>{{ node.anonymousRelayId }}</span>
                                 </div>
                                 <div class="info-item">
-                                    <span class="label">接入网RelayID:</span>
+                                    <span class="label">接入网络中继ID:</span>
                                     <span>{{ node.accessRelayId }}</span>
                                 </div>
                                 </Col>
@@ -126,7 +126,7 @@
                         <span class="angle2"></span>
                         <span class="angle3"></span>
                         <span class="angle4"></span>
-                        <!-- <div class="card-title">Relay列表</div> -->
+                        <!-- <div class="card-title">中继列表</div> -->
                         <Table :columns="tableColumns" :data="relayData" class="expandable-table">
 
                         </Table>
@@ -135,20 +135,27 @@
             </div>
 
             <!-- 弹窗 -->
-            <Modal v-model="dialogVisible" :title="dialogTitle" width="400">
-                <template v-if="currentAction === 'updateNode'">
+            <Modal v-model="dialogVisible" :title="dialogTitle" width="400" @on-ok="confirmAction">
+                <template v-if="currentAction === 'updateRole'">
                     <Form :model="nodeForm" :label-width="100">
-                        <!-- <FormItem label="昵称">
-                            <Input v-model="nodeForm.nickname" />
-                        </FormItem> -->
-                        <FormItem label="角色">
+                        <FormItem label="节点ID">
+                            <Input v-model="nodeForm.nodeId" disabled />
+                        </FormItem>
+                        <FormItem label="节点角色">
                             <Select v-model="nodeForm.role" placeholder="选择角色">
                                 <Option value="VPS_DA" label="VPS_DA" />
                                 <Option value="VPS_RELAY" label="VPS_RELAY" />
                                 <Option value="CLIENT" label="CLIENT" />
                             </Select>
                         </FormItem>
-                        <FormItem label="状态">
+                    </Form>
+                </template>
+                <template v-if="currentAction === 'updateStatus'">
+                    <Form :model="nodeForm" :label-width="100">
+                        <FormItem label="节点ID">
+                            <Input v-model="nodeForm.nodeId" disabled />
+                        </FormItem>
+                        <FormItem label="节点状态">
                             <Select v-model="nodeForm.status" placeholder="选择状态">
                                 <Option value="ONLINE" label="ONLINE" />
                                 <Option value="OFFLINE" label="OFFLINE" />
@@ -159,14 +166,46 @@
                 </template>
                 <template v-else-if="currentAction === 'createRelay'">
                     <Form :model="relayForm" :label-width="100">
-                        <FormItem label="昵称">
+                        <!-- <FormItem label="昵称">
                             <Input v-model="relayForm.nickname" />
+                        </FormItem> -->
+                        <FormItem label="中继类型">
+                            <Select v-model="relayForm.type" placeholder="选择类型">
+                                <Option value="ANONYMOUS" label="ANONYMOUS" />
+                                <Option value="ACCESS" label="ACCESS" />
+                                <!-- <Option value="UNKNOWN" label="UNKNOWN" /> -->
+                            </Select>
+                        </FormItem>
+                        <FormItem label="中继角色">
+                            <Select v-model="relayForm.role" placeholder="选择角色">
+                                <Option value="ROLE_DA" label="ROLE_DA" />
+                                <Option value="ROLE_RELAY" label="ROLE_RELAY" />
+                                <Option value="ROLE_EXIT" label="ROLE_EXIT" />
+                                <Option value="ROLE_CLIENT" label="ROLE_CLIENT" />
+                                <Option value="ROLE_HS" label="ROLE_HS" />
+                            </Select>
+                        </FormItem>
+                    </Form>
+                </template>
+                <template v-else-if="currentAction === 'updateRelay'">
+                    <Form :model="relayForm" :label-width="100">
+                        <FormItem label="中继ID">
+                            <Input v-model="relayForm.relayId" disabled />
                         </FormItem>
                         <FormItem label="中继类型">
                             <Select v-model="relayForm.type" placeholder="选择类型">
                                 <Option value="ANONYMOUS" label="ANONYMOUS" />
                                 <Option value="ACCESS" label="ACCESS" />
-                                <Option value="UNKNOWN" label="UNKNOWN" />
+                                <!-- <Option value="UNKNOWN" label="UNKNOWN" /> -->
+                            </Select>
+                        </FormItem>
+                        <FormItem label="中继角色">
+                            <Select v-model="relayForm.role" placeholder="选择角色">
+                                <Option value="ROLE_DA" label="ROLE_DA" />
+                                <Option value="ROLE_RELAY" label="ROLE_RELAY" />
+                                <Option value="ROLE_EXIT" label="ROLE_EXIT" />
+                                <Option value="ROLE_CLIENT" label="ROLE_CLIENT" />
+                                <Option value="ROLE_HS" label="ROLE_HS" />
                             </Select>
                         </FormItem>
                     </Form>
@@ -185,9 +224,9 @@
 </template>
 
 <script>
-import axios from 'axios';
 import { formatDate, formatBytes, formatPercentage } from "@/lib/formatters.js";
-import { fetchNodeDetail } from '@/api/node';
+import { handleApiSafely } from "@/lib/utils.js";
+import { fetchNodeDetail, updateNode, createRelay, deleteRelay, fetchRelayList, deleteNode, updateRelay } from '@/api/node';
 const worldMap = () => import('@/views/components/worldMap');
 
 export default {
@@ -195,6 +234,7 @@ export default {
     components: {
         worldMap
     },
+    emits: ['refresh-and-clear'],
     props: {
         nodeId: {
             type: String,
@@ -210,15 +250,15 @@ export default {
             currentAction: '',
             nodeForm: {
                 nodeId: '',
-                nickname: '',
                 role: '',
                 status: ''
             },
             relayForm: {
-                nickname: '',
-                type: ''
+                //nickname: '',
+                relayId: '',
+                type: '',
+                role: ''
             },
-            useMock: true,
             selectedRelay: null,
             tableColumns: [
                 {
@@ -270,7 +310,7 @@ export default {
                         }, [
                             h('Row', { props: { gutter: 8 } }, [
                                 h('Col', { props: { span: 12 } }, [
-                                    createInfoItem('Relay ID:', row.relayId),
+                                    createInfoItem('中继ID:', row.relayId),
                                     createInfoItem('昵称:', row.nickname),
                                     createInfoItem('指纹:', row.fingerprint),
                                     createInfoItem('IP 地址:', row.ipAddress),
@@ -307,17 +347,18 @@ export default {
                                     createInfoItem('VPS节点ID:', row.nodeId),
                                     createInfoItem('容器ID:', row.containerId),
                                     createInfoItem('容器名称:', row.containerName),
-                                    createInfoItem('Relay状态:', row.status),
+                                    createInfoItem('中继状态:', row.status),
                                     createInfoItem('创建时间:', row.createdAt ? formatDate(row.createdAt) : null),
                                     createInfoItem('更新时间:', row.updatedAt ? formatDate(row.updatedAt) : null),
-                                    createInfoItem('Relay类型:', row.relayType)
+                                    createInfoItem('中继类型:', row.relayType),
+                                    createInfoItem('中继类型:', row.relayRole),
                                 ])
                             ]),
                         ]);
                     }
                 },
                 {
-                    title: 'Relay ID',
+                    title: '中继ID',
                     key: 'relayId',
                     width: 150,
                 },
@@ -412,7 +453,7 @@ export default {
                                         this.openRelayDialog('updateRelay', params.row);
                                     }
                                 }
-                            }, '更新Relay信息'),
+                            }, '更新中继信息'),
                             h('Button', {
                                 props: {
                                     size: 'small'
@@ -423,7 +464,7 @@ export default {
                                         this.openRelayDialog('destroyRelay', params.row);
                                     }
                                 }
-                            }, '销毁Relay')
+                            }, '销毁中继')
                         ]);
                     }
                 }
@@ -450,111 +491,80 @@ export default {
         formatPercentage,
 
         async fetchNodeData(nodeId) {
-            try {
-                const nodeData = await fetchNodeDetail(nodeId);
-                if (nodeData === null) {
-                    this.$Message.error('节点信息不存在或获取失败');
-                    return;
-                }
+            // 获取节点详情
+            const nodeData = await handleApiSafely(
+                () => fetchNodeDetail(nodeId),
+                '获取节点详情'
+            );
+            if (nodeData) {
                 this.node = nodeData;
-                this.fetchRelayData(nodeId);
-            } catch (error) {
-                console.error('获取节点详情失败:', error);
-                this.$Message.error('获取节点详情失败');
+            }
+
+            // 获取中继列表
+            const relayList = await handleApiSafely(
+                () => fetchRelayList(nodeId),
+                '获取中继列表'
+            );
+            if (relayList) {
+                this.relayData = relayList;
             }
         },
 
-        async fetchRelayData(nodeId) {
-            if (this.useMock) {
-                // 模拟数据
-                this.relayData = Array(5).fill(0).map((_, index) => ({
-                    relayId: `relay-${nodeId}-${index + 1000}`,
-                    nickname: `Relay-${index}`,
-                    fingerprint: `FP${Math.random().toString(16).substring(2, 10).toUpperCase()}`,
-                    ipAddress: `192.168.1.${Math.floor(Math.random() * 255)}`,
-                    orPort: 9000 + Math.floor(Math.random() * 1000),
-                    dirPort: 8000 + Math.floor(Math.random() * 1000),
-                    bandwidth: Math.floor(Math.random() * 10000000),
-                    exitPolicy: Math.random() > 0.5 ? 'accept *:*' : 'reject *:*',
-                    published: new Date(Date.now() - Math.random() * 30 * 86400000),
-                    flags: ['Fast', 'Stable', 'Valid'].filter(() => Math.random() > 0.5),
-                    version: `0.${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}`,
-                    platform: ['Linux', 'Windows', 'macOS'][Math.floor(Math.random() * 3)],
-                    containerId: `c-${Math.random().toString(16).substring(2, 10)}`,
-                    containerName: `container-${index}`,
-                    status: ['RELAY_RUNNING', 'RELAY_STOPPED', 'RELAY_FAILED', 'RELAY_CREATING'][Math.floor(Math.random() * 4)],
-                    createdAt: new Date(Date.now() - Math.random() * 90 * 86400000),
-                    updatedAt: new Date(Date.now() - Math.random() * 10 * 86400000),
-                    relayType: ['ANONYMOUS', 'ACCESS', 'EXIT'][Math.floor(Math.random() * 3)]
-                }));
-                console.log(this.relayData);
-            } else {
-                try {
-                    // 实际项目中的API调用
-                    // const response = await axios.get(`/api/nodes/${nodeId}/relays`);
-                    // this.relayData = response.data;
-                } catch (error) {
-                    console.error('获取中继数据失败:', error);
-                }
-            }
-        },
         openRelayDialog(action, relay) {
             this.currentAction = action;
             this.selectedRelay = relay;
 
             if (action === 'updateRelay') {
-                this.dialogTitle = '更新Relay信息';
+                this.dialogTitle = '更新中继信息';
                 this.relayForm = {
-                    nickname: relay.nickname,
-                    type: relay.relayType
+                    relayId: relay.relayId,
+                    type: relay.relayType,
+                    role: relay.relayRole,
                 };
             } else if (action === 'destroyRelay') {
-                this.dialogTitle = '销毁Relay';
-                this.dialogMessage = `确定要销毁Relay ${relay.relayId} 吗？此操作不可恢复。`;
+                this.dialogTitle = '销毁中继';
+                this.dialogMessage = `确定要销毁中继 ${relay.relayId} 吗？此操作不可恢复。`;
             }
 
             this.dialogVisible = true;
         },
 
         async destroyRelay() {
-            try {
-                console.log('销毁Relay', this.selectedRelay);
-                if (this.useMock) {
-                    this.relayData = this.relayData.filter(r => r.relayId !== this.selectedRelay.relayId);
-                    this.node.relayCount--;
-                    this.$Message.success('Relay销毁成功');
-                    return;
-                }
-                // 实际项目中的API调用
-                // await axios.delete(`/api/relays/${this.selectedRelay.relayId}`);
-                // this.$Message.success('Relay销毁成功');
-                // this.fetchRelayData(this.nodeId);
-            } catch (error) {
-                console.error('销毁Relay失败:', error);
-                this.$Message.error('销毁Relay失败');
+            console.log('销毁中继', this.selectedRelay);
+
+            const message = await handleApiSafely(
+                () => deleteRelay(this.selectedRelay.relayId, {
+                    userId: 'admin' // 使用当前用户ID
+                }),
+                "销毁中继"
+            );
+
+            if (message) {
+                this.$Message.success(message);
+                // 刷新中继列表和节点信息
+                await this.fetchNodeData(this.nodeId);
             }
         },
+
         async updateRelayInfo() {
-            try {
-                console.log('更新Relay信息', this.selectedRelay, this.relayForm);
-                if (this.useMock) {
-                    const index = this.relayData.findIndex(r => r.relayId === this.selectedRelay.relayId);
-                    if (index !== -1) {
-                        this.relayData[index].nickname = this.relayForm.nickname;
-                        this.relayData[index].relayType = this.relayForm.type;
-                    }
-                    this.$Message.success('Relay信息更新成功');
-                    return;
-                }
-                // 实际项目中的API调用
-                // await axios.put(`/api/relays/${this.selectedRelay.relayId}`, this.relayForm);
-                // this.$Message.success('Relay信息更新成功');
-                // this.fetchRelayData(this.nodeId);
-            } catch (error) {
-                console.error('更新Relay信息失败:', error);
-                this.$Message.error('更新Relay信息失败');
+            console.log('更新中继信息', this.selectedRelay, this.relayForm);
+
+            const message = await handleApiSafely(
+                () => updateRelay(this.selectedRelay.relayId, {
+                    type: this.relayForm.type,
+                    role: this.relayForm.role,
+                    userId: 'admin' // 使用当前用户ID
+                }),
+                "更新中继信息"
+            );
+
+            if (message) {
+                this.$Message.success(message);
+                // 刷新中继列表
+                await this.fetchNodeData(this.nodeId);
             }
         },
+
         refresh() {
             if (this.nodeId) {
                 this.fetchNodeData(this.nodeId);
@@ -562,24 +572,39 @@ export default {
         },
 
         goBack() {
+            // 触发事件通知父组件刷新和清除选中
+            this.$emit('refresh-and-clear');
+            // 导航回节点列表页
             this.$router.push('/nodes');
         },
+
 
         openDialog(action) {
             this.currentAction = action;
             if (action === 'createRelay') {
                 this.dialogTitle = '创建中继节点';
-            } else if (action === 'updateNode') {
-                this.dialogTitle = '更新节点';
+                this.relayForm = {
+                    relayId: '',
+                    role: '',
+                    type: '',
+                }
+            } else if (action === 'updateRole') {
+                this.dialogTitle = '更新节点角色';
                 this.nodeForm = {
                     nodeId: this.node.nodeId,
-                    nickname: this.node.nickname,
+                    role: this.node.role,
+                    status: this.node.status,
+                };
+            } else if (action === 'updateStatus') {
+                this.dialogTitle = '更新节点状态';
+                this.nodeForm = {
+                    nodeId: this.node.nodeId,
                     role: this.node.role,
                     status: this.node.status,
                 };
             } else if (action === 'destroyNode') {
                 this.dialogTitle = '销毁节点';
-                this.dialogMessage = '确定要销毁此节点吗？';
+                this.dialogMessage = `确定要销毁 ${this.node.nodeId} 节点吗？`;
             }
             this.dialogVisible = true;
         },
@@ -587,13 +612,16 @@ export default {
         async confirmAction() {
             try {
                 if (this.currentAction === 'createRelay') {
-                    await this.createRelay();
+                    await this.createNewRelay();
                     await this.fetchNodeData(this.nodeId);
-                } else if (this.currentAction === 'updateNode') {
-                    await this.updateNode();
+                } else if (this.currentAction === 'updateRole') {
+                    await this.updateRole();
+                    await this.fetchNodeData(this.nodeId);
+                } else if (this.currentAction === 'updateStatus') {
+                    await this.updateStatus();
                     await this.fetchNodeData(this.nodeId);
                 } else if (this.currentAction === 'destroyNode') {
-                    await this.deleteNode();
+                    await this.destroyNode();
                 } else if (this.currentAction === 'destroyRelay') {
                     await this.destroyRelay();
                 } else if (this.currentAction === 'updateRelay') {
@@ -606,84 +634,49 @@ export default {
             }
         },
 
-        async createRelay() {
+        async createNewRelay() {
             console.log('创建中继节点', this.node, this.relayForm);
-            if (this.useMock) {
-                this.node.relayCount++;
-                this.$Message.success('中继节点创建成功');
-                return;
-            }
-            try {
-                const response = await axios.post('/api/nodes', {
-                    nickname: this.relayForm.nickname,
-                    nodeId: this.node.nodeId,
-                    role: this.node.role,
-                    status: this.node.status,
-                    createdBy: null,
-                    relayType: this.relayForm.type
-                });
-
-                if (response.status === 201) {
-                    this.$Message.success('中继节点创建成功');
-                } else {
-                    this.$Message.error('中继节点创建失败，请稍后重试');
-                }
-            } catch (error) {
-                console.error('创建中继节点失败：', error);
-                this.$Message.error('中继节点创建失败');
-            }
+            const message = await handleApiSafely(() => createRelay(this.node.nodeId,
+                {
+                    type: this.relayForm.type,
+                    role: this.relayForm.role,
+                    userId: 'admin',
+                })
+                , "创建中继节点");
+            this.$Message.success(message);
         },
 
-        async updateNode() {
-            console.log('更新节点，新的数据：', this.nodeForm);
-            if (this.useMock) {
-                if (this.node) {
-                    this.node.nickname = this.nodeForm.nickname;
-                    this.node.role = this.nodeForm.role;
-                    this.node.status = this.nodeForm.status;
-                }
-                this.$Message.success('节点更新成功');
-                return;
-            }
-            try {
-                const nodeId = this.nodeForm.nodeId;
-                const response = await axios.put(`/api/nodes/${nodeId}`, {
-                    nickname: this.nodeForm.nickname,
+        async updateRole() {
+            console.log('更新节点角色', this.node, this.nodeForm);
+            const message = await handleApiSafely(() => updateNode(this.node.nodeId,
+                {
                     role: this.nodeForm.role,
-                    status: this.nodeForm.status,
-                    userId: null
-                });
-
-                if (response.status === 200) {
-                    this.$Message.success('节点更新成功');
-                } else {
-                    this.$Message.error('节点更新失败，请稍后重试');
-                }
-            } catch (error) {
-                console.error('更新失败：', error);
-                this.$Message.error('节点更新失败');
-            }
+                    userId: 'admin',
+                })
+                , "更新节点角色");
+            this.$Message.success(message);
         },
 
-        async deleteNode() {
+        async updateStatus() {
+            console.log('更新节点状态', this.node, this.nodeForm);
+            const message = await handleApiSafely(() => updateNode(this.node.nodeId,
+                {
+                    status: this.nodeForm.status,
+                    userId: 'admin',
+                })
+                , "更新节点状态");
+            this.$Message.success(message);
+        },
+
+        async destroyNode() {
             console.log('销毁节点', this.node);
-            if (this.useMock) {
-                this.$Message.success('节点销毁成功');
+            const message = await handleApiSafely(
+                () => deleteNode(this.node.nodeId, 'admin'),  // 传递nodeId和userId
+                "销毁节点"
+            );
+            if (message) {
+                this.$Message.success(message);
                 this.goBack();
-                return;
-            }
-            try {
-                const userId = null;
-                const response = await axios.delete(`/api/nodes/node/${this.node.nodeId}?userId=${userId}`);
-                if (response.status === 200) {
-                    this.$Message.success('节点销毁成功');
-                    this.goBack();
-                } else {
-                    this.$Message.error('节点销毁失败，请稍后重试');
-                }
-            } catch (error) {
-                console.error('销毁节点失败：', error);
-                this.$Message.error('节点销毁失败');
             }
         },
 

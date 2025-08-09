@@ -12,7 +12,7 @@
                 <Select v-model="selectedStatus" placeholder="状态" clearable class="filter-item">
                     <Option v-for="status in statusOptions" :key="status" :label="status" :value="status" />
                 </Select>
-                 <Button icon="ios-refresh" @click="refreshAllNodes" >刷新</Button>
+                <Button icon="ios-refresh" @click="refreshAllNodes">刷新</Button>
             </div>
             <div class="item-list">
                 <div v-for="node in filteredList" :key="node.nodeId" class="list-item"
@@ -31,7 +31,7 @@
             </div>
         </div>
         <div class="detail">
-            <detail :nodeId="currentRowKey" />
+            <detail :nodeId="currentRowKey" @refresh-and-clear="handleRefreshAndClear" />
         </div>
     </div>
 </template>
@@ -39,6 +39,7 @@
 
 <script>
 import { fetchNodes } from '@/api/node.js';
+import { handleApiSafely } from "@/lib/utils.js";
 import { defaultFormatter } from '@/lib/formatters.js';
 
 const Detail = () => import('./components/nodes/detail');
@@ -82,9 +83,21 @@ export default {
         }
     },
     async mounted() {
-        this.nodes = await fetchNodes({});
+        this.nodes = await handleApiSafely(
+            () => fetchNodes({}),
+            '节点列表'
+        );
     },
     methods: {
+        async handleRefreshAndClear() {
+            // 清除当前选中状态
+            this.currentRowKey = null;
+            this.selectedNode = null;
+
+            // 刷新节点列表
+            await this.refreshAllNodes();
+        },
+
         async refreshAllNodes() {
             this.$Spin.show({ render: (h) => h('div', [h('Icon', { props: { type: 'ios-loading', size: 18 }, style: { animation: 'ani-demo-spin 1s linear infinite' } }), h('div', '正在刷新节点信息...')]) });
             //Todo: 刷新所有节点信息
@@ -134,7 +147,6 @@ export default {
 
 
 <style lang="less" scoped>
-
 @primary-color: #75deef;
 @border-color: #2b3a57;
 @bg-primary: #03044A;
@@ -180,52 +192,53 @@ export default {
                 width: 30%;
                 min-width: 0;
             }
+
             .ivu-btn {
-                    width: 20%; // 按钮宽度占满容器
-                    // height: 30px; // 固定按钮高度
-                    //margin: 0 0 12px 0; // 底部间距
-                    //flex: 1;
-                    padding: 0 20px;
-                    //border-radius: 6px;
-                    // font-weight: 600;
-                    font-size: 12px;
-                    font-family: inherit;
-                    transition: all 0.3s ease;
-                    border: 1px solid #75deef;
-                    color: @text-primary !important;
-                    background: @bg-secondary;
-                    position: relative;
-                    overflow: hidden;
-                    //display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    
-                    &::before {
-                        content: '';
-                        position: absolute;
-                        top: 0;
-                        left: -100%;
-                        width: 100%;
-                        height: 100%;
-                        background: linear-gradient(90deg, transparent, #1a3c58, transparent);
-                        transition: left 0.5s;
-                    }
+                width: 20%; // 按钮宽度占满容器
+                // height: 30px; // 固定按钮高度
+                //margin: 0 0 12px 0; // 底部间距
+                //flex: 1;
+                padding: 0 20px;
+                //border-radius: 6px;
+                // font-weight: 600;
+                font-size: 12px;
+                font-family: inherit;
+                transition: all 0.3s ease;
+                border: 1px solid #75deef;
+                color: @text-primary !important;
+                background: @bg-secondary;
+                position: relative;
+                overflow: hidden;
+                //display: flex;
+                align-items: center;
+                justify-content: center;
 
-                    &:hover::before {
-                        left: 100%;
-                    }
-
-                    &:hover {
-                        border-color: #75deef;
-                        background: #1a3c58;
-                        transform: translateY(-2px);
-                        box-shadow: 0 4px 12px rgba(117, 222, 239, 0.3);
-                    }
-
-                    &:active {
-                        transform: translateY(0);
-                    }
+                &::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, #1a3c58, transparent);
+                    transition: left 0.5s;
                 }
+
+                &:hover::before {
+                    left: 100%;
+                }
+
+                &:hover {
+                    border-color: #75deef;
+                    background: #1a3c58;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(117, 222, 239, 0.3);
+                }
+
+                &:active {
+                    transform: translateY(0);
+                }
+            }
         }
 
         .item-list {

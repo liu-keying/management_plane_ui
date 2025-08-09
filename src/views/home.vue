@@ -152,6 +152,7 @@ export default {
 .ivu-modal {
     .ivu-modal-content {
         background: #071332;
+        color: #75deef;
 
         .ivu-modal-header {
             border-bottom: 1px solid #1a3c58;
@@ -163,7 +164,14 @@ export default {
 
         .ivu-modal-body {
             text-align: center;
-
+            color: #75deef;
+            .ivu-form {
+                .ivu-form-item-label {
+                    font-size: 13px;
+                    font-weight:500;
+                    color: #75deef; 
+                }
+            }
             .ivu-icon {
                 color: #75deef
             }
@@ -177,6 +185,8 @@ export default {
                 background-color: rgba(0, 0, 0, 0);
                 border: 1px solid #1a3c58;
                 color: #75deef;
+                text-align:center;
+                font-size:13px;
 
                 &::-webkit-input-placeholder {
                     /* WebKit, Blink, Edge */

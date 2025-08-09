@@ -13,6 +13,9 @@ Vue.prototype.$echarts = function (el) {
 Vue.prototype.$images = img
 Vue.config.productionTip = false;
 Vue.use(iView);
+Vue.prototype.$Message.config({
+  duration: 6  
+});
 Vue.use(utils)
 new Vue({
   router,

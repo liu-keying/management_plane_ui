@@ -1,8 +1,6 @@
 [
   {
     "nodeId": "node-001",
-    "nickname": "Alpha",
-    "fingerprint": "abc123xyz",
     "ipAddress": "192.168.1.1",
     "role": "VPS_RELAY",
     "status": "ONLINE",
@@ -13,18 +11,16 @@
     "trafficOut": 2048576,
     "geoLocation": "Tokyo, Japan",
     "cloudProvider": "AWS",
-    "createdAt": "2025-06-20T08:30:00Z",
+    "createdAt": "2025-06-20 08:30:00",
     "createdBy": "admin",
     "lastHeartbeat": "2025-06-27T04:00:00Z",
     "relayCount": 3,
     "maxRelayCapacity": 10,
     "anonymousRelayId": "relay-001",
-    "accessRelayId": "relay-016"
+    "accessRelayId": "relay-002"
   },
   {
     "nodeId": "node-002",
-    "nickname": "Beta",
-    "fingerprint": "def456uvw",
     "ipAddress": "10.0.0.2",
     "role": "CLIENT",
     "status": "OFFLINE",
@@ -40,8 +36,8 @@
     "lastHeartbeat": "2025-06-25T22:00:00Z",
     "relayCount": 0,
     "maxRelayCapacity": 0,
-    "anonymousRelayId": "relay-002",
-    "accessRelayId": "relay-017"
+    "anonymousRelayId": "relay-003",
+    "accessRelayId": "relay-004"
   },
   {
     "nodeId": "node-003",
@@ -62,8 +58,8 @@
     "lastHeartbeat": "2025-06-27T04:05:00Z",
     "relayCount": 7,
     "maxRelayCapacity": 15,
-    "anonymousRelayId": "relay-003",
-    "accessRelayId": "relay-018"
+    "anonymousRelayId": "relay-005",
+    "accessRelayId": "relay-006"
   },
   {
     "nodeId": "node-004",
@@ -84,8 +80,8 @@
     "lastHeartbeat": "2025-06-27T04:02:00Z",
     "relayCount": 0,
     "maxRelayCapacity": 0,
-    "anonymousRelayId": "relay-004",
-    "accessRelayId": "relay-019"
+    "anonymousRelayId": "relay-007",
+    "accessRelayId": "relay-008"
   },
   {
     "nodeId": "node-005",
@@ -106,8 +102,8 @@
     "lastHeartbeat": "2025-06-27T03:59:00Z",
     "relayCount": 5,
     "maxRelayCapacity": 10,
-    "anonymousRelayId": "relay-005",
-    "accessRelayId": "relay-020"
+    "anonymousRelayId": "relay-009",
+    "accessRelayId": "relay-010"
   },
   {
     "nodeId": "node-006",

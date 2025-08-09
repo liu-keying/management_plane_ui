@@ -1,9 +1,9 @@
 export function formatBytes(bytes) {
-    if (bytes == null || isNaN(bytes)) return '-';
-    if (bytes >= 1e9) return (bytes / 1e9).toFixed(2) + ' GB';
-    if (bytes >= 1e6) return (bytes / 1e6).toFixed(2) + ' MB';
-    if (bytes >= 1e3) return (bytes / 1e3).toFixed(2) + ' KB';
-    return bytes + ' B';
+    // if (bytes == null || isNaN(bytes)) return '-';
+    // if (bytes >= 1e9) return (bytes / 1e9).toFixed(2) + ' GB';
+    // if (bytes >= 1e6) return (bytes / 1e6).toFixed(2) + ' MB';
+    // if (bytes >= 1e3) return (bytes / 1e3).toFixed(2) + ' KB';
+    return bytes + ' KB';
 }
 
   
