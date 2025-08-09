@@ -3,15 +3,16 @@
         <div class="sidebar">
             <!-- 筛选器 -->
             <div class="filter-bar">
-                <Input v-model="searchKeyword" placeholder="搜索 ID / IP地址 " clearable
-                    class="filter-item search-input" icon="ios-search">
+                <Input v-model="searchKeyword" placeholder="搜索 ID / IP地址 " clearable class="filter-item search-input"
+                    icon="ios-search">
                 </Input>
-                <Select v-model="selectedRole" placeholder="选择角色" clearable class="filter-item">
+                <Select v-model="selectedRole" placeholder="角色" clearable class="filter-item">
                     <Option v-for="role in roleOptions" :key="role" :label="role" :value="role" />
                 </Select>
-                <Select v-model="selectedStatus" placeholder="选择状态" clearable class="filter-item">
+                <Select v-model="selectedStatus" placeholder="状态" clearable class="filter-item">
                     <Option v-for="status in statusOptions" :key="status" :label="status" :value="status" />
                 </Select>
+                 <Button icon="ios-refresh" @click="refreshAllNodes" >刷新</Button>
             </div>
             <div class="item-list">
                 <div v-for="node in filteredList" :key="node.nodeId" class="list-item"
@@ -84,6 +85,18 @@ export default {
         this.nodes = await fetchNodes({});
     },
     methods: {
+        async refreshAllNodes() {
+            this.$Spin.show({ render: (h) => h('div', [h('Icon', { props: { type: 'ios-loading', size: 18 }, style: { animation: 'ani-demo-spin 1s linear infinite' } }), h('div', '正在刷新节点信息...')]) });
+            //Todo: 刷新所有节点信息
+            // try {
+            //     this.nodes = await fetchNodes({});
+            //     this.$Message.success('节点信息刷新成功');
+            // } catch (error) {
+            //     this.$Message.error('刷新节点信息失败：' + (error.message || '未知错误'));
+            // } finally {
+            //     this.$Spin.hide();
+            // }
+        },
         handleCurrentChange(val) {
             // 如果点击的是当前已选中的节点，则取消选中
             if (val && this.currentRowKey === val.nodeId) {
@@ -121,6 +134,7 @@ export default {
 
 
 <style lang="less" scoped>
+
 @primary-color: #75deef;
 @border-color: #2b3a57;
 @bg-primary: #03044A;
@@ -149,21 +163,69 @@ export default {
         .filter-bar {
             display: flex;
             flex-direction: row;
-            gap: 12px;
+            gap: 6px;
             margin-bottom: 10px;
-            padding-right: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            //padding-right: 10px;
             //padding-bottom: 16px;
             // border-bottom: 1px solid @border-color;
 
             .filter-item {
-                flex: 1;
+                width: 20%;
                 min-width: 0;
             }
 
             .search-input {
-                flex: 2;
+                width: 30%;
                 min-width: 0;
             }
+            .ivu-btn {
+                    width: 20%; // 按钮宽度占满容器
+                    // height: 30px; // 固定按钮高度
+                    //margin: 0 0 12px 0; // 底部间距
+                    //flex: 1;
+                    padding: 0 20px;
+                    //border-radius: 6px;
+                    // font-weight: 600;
+                    font-size: 12px;
+                    font-family: inherit;
+                    transition: all 0.3s ease;
+                    border: 1px solid #75deef;
+                    color: @text-primary !important;
+                    background: @bg-secondary;
+                    position: relative;
+                    overflow: hidden;
+                    //display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    
+                    &::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: -100%;
+                        width: 100%;
+                        height: 100%;
+                        background: linear-gradient(90deg, transparent, #1a3c58, transparent);
+                        transition: left 0.5s;
+                    }
+
+                    &:hover::before {
+                        left: 100%;
+                    }
+
+                    &:hover {
+                        border-color: #75deef;
+                        background: #1a3c58;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(117, 222, 239, 0.3);
+                    }
+
+                    &:active {
+                        transform: translateY(0);
+                    }
+                }
         }
 
         .item-list {

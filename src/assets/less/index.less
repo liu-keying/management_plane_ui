@@ -64,6 +64,61 @@
 
 }
 
+// 按钮样式变量
+@primary-color: #75deef;
+@border-color: #2b3a57;
+@bg-button: #1a3c58;
+
+// 科技风格按钮
+.tech-button {
+  width: 100%; // 按钮宽度占满容器
+  height: 50px; // 固定按钮高度
+  margin: 0 0 12px 0; // 底部间距
+  padding: 0 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  border: 1px solid @primary-color;
+  color: @primary-color;
+  background: @bg-button;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:last-child {
+      margin-bottom: 0; // 最后一个按钮底部无间距
+  }
+
+  &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, @bg-button, transparent);
+      transition: left 0.5s;
+  }
+
+  &:hover::before {
+      left: 100%;
+  }
+
+  &:hover {
+      border-color: @primary-color;
+      background: @bg-button;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(117, 222, 239, 0.3);
+  }
+
+  &:active {
+      transform: translateY(0);
+  }
+}
+
 
 @primary-color: #75deef;
 @border-color: #2b3a57;

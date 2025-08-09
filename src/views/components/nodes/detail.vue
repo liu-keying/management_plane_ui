@@ -17,10 +17,10 @@
                         <world-map ref="worldMap" :nodes="[node]"></world-map>
                     </div>
                     <div class="action-buttons">
-                        <Button @click="openDialog('createRelay')">创建中继节点</Button>
-                        <Button @click="openDialog('updateNode')">更新节点信息</Button>
+                        <Button @click="openDialog('createRelay')">创建Relay</Button>
+                        <Button @click="openDialog('updateRole')">更新节点角色</Button>
+                        <Button @click="openDialog('updateStatus')">更新节点状态</Button>
                         <Button @click="openDialog('destroyNode')">销毁节点</Button>
-                        <Button @click="refresh()">刷新</Button>
                     </div>
                 </div>
                 <div class="bottom-section">
@@ -50,10 +50,13 @@
                                     <!-- <Tag :color="statusTagType(node.status)">{{ node.status }}</Tag> -->
                                 </div>
                                 <div class="info-item">
-                                    <span class="label">风险等级:</span>
-                                    <span>{{ node.riskLevel }}</span>
+                                    <span class="label">云提供商:</span>
+                                    <span>{{ node.cloudProvider }}</span>
                                 </div>
-
+                                <div class="info-item">
+                                    <span class="label">地理位置:</span>
+                                    <span>{{ node.geoLocation }}</span>
+                                </div>
 
                                 </Col>
 
@@ -74,42 +77,59 @@
                                     <span class="label">流出流量:</span>
                                     <span>{{ formatBytes(node.trafficOut) }}</span>
                                 </div>
-                                <div class="info-item">
-                                    <span class="label">Relay数量:</span>
-                                    <span>{{ node.relayCount }}</span>
-                                </div>
 
-                                </Col>
-
-                                <Col :span="8">
-                                <div class="info-item">
-                                    <span class="label">云提供商:</span>
-                                    <span>{{ node.cloudProvider }}</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="label">地理位置:</span>
-                                    <span>{{ node.geoLocation }}</span>
-                                </div>
                                 <div class="info-item">
                                     <span class="label">创建时间:</span>
                                     <span>{{ formatDate(node.createdAt) }}</span>
                                 </div>
+                                <div class="info-item">
+                                    <span class="label">最后心跳:</span>
+                                    <span>{{ formatDate(node.lastHeartbeat) }}</span>
+                                </div>
+                                </Col>
+
+                                <Col :span="8">
+
+
                                 <!-- <div class="info-item">
                                     <span class="label">创建人:</span>
                                     <span>{{ node.createdBy || '无' }}</span>
                                 </div> -->
                                 <div class="info-item">
-                                    <span class="label">最后心跳:</span>
-                                    <span>{{ formatDate(node.lastHeartbeat) }}</span>
+                                    <span class="label">风险等级:</span>
+                                    <span>{{ node.riskLevel }}</span>
                                 </div>
+
                                 <div class="info-item">
                                     <span class="label">最大Relay容量:</span>
                                     <span>{{ node.maxRelayCapacity }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">Relay数量:</span>
+                                    <span>{{ node.relayCount }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">匿名网RelayID:</span>
+                                    <span>{{ node.anonymousRelayId }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="label">接入网RelayID:</span>
+                                    <span>{{ node.accessRelayId }}</span>
                                 </div>
                                 </Col>
                             </Row>
                         </div>
 
+                    </Card>
+                    <Card :padding="20" class="detail-card expandable-table-card">
+                        <span class="angle1"></span>
+                        <span class="angle2"></span>
+                        <span class="angle3"></span>
+                        <span class="angle4"></span>
+                        <!-- <div class="card-title">Relay列表</div> -->
+                        <Table :columns="tableColumns" :data="relayData" class="expandable-table">
+
+                        </Table>
                     </Card>
                 </div>
             </div>
@@ -198,7 +218,217 @@ export default {
                 nickname: '',
                 type: ''
             },
-            useMock: true
+            useMock: true,
+            selectedRelay: null,
+            tableColumns: [
+                {
+                    type: 'expand',
+                    width: 50,
+                    render: (h, params) => {
+                        const row = params.row;
+
+                        // 创建统一样式的信息项
+                        const createInfoItem = (label, value) => {
+                            return h('div', {
+                                class: 'info-item',
+                                style: {
+                                    marginBottom: '5px',
+                                    padding: '5px 0',
+                                    borderBottom: '1px solid rgba(13, 36, 81, 0.3)',
+                                    transition: 'all 0.3s ease'
+                                }
+                            }, [
+                                h('span', {
+                                    class: 'label',
+                                    style: {
+                                        display: 'inline-block',
+                                        fontWeight: '600',
+                                        //marginRight: '5px',
+                                        color: '#6EDDF1',
+                                        minWidth: '80px',
+                                        fontSize: '13px',
+                                        textShadow: '0 0 6px rgba(117, 222, 239, 0.3)'
+                                    }
+                                }, label),
+                                h('span', {
+                                    style: {
+                                        color: '#75deef',
+                                        fontSize: '13px',
+                                        fontFamily: "'Courier New', monospace"
+                                    }
+                                }, value || '无')
+                            ]);
+                        };
+
+                        return h('div', {
+                            class: 'detail-info',
+                            style: {
+                                padding: '10px',
+                                background: '#151456',
+                                //borderRadius: '4px'
+                            }
+                        }, [
+                            h('Row', { props: { gutter: 8 } }, [
+                                h('Col', { props: { span: 12 } }, [
+                                    createInfoItem('Relay ID:', row.relayId),
+                                    createInfoItem('昵称:', row.nickname),
+                                    createInfoItem('指纹:', row.fingerprint),
+                                    createInfoItem('IP 地址:', row.ipAddress),
+                                    createInfoItem('OR端口:', row.orPort),
+                                    createInfoItem('DIR端口:', row.dirPort),
+                                    createInfoItem('带宽:', formatBytes(row.bandwidth)),
+                                    createInfoItem('退出策略:', row.exitPolicy),
+                                    createInfoItem('发布时间:', row.published ? formatDate(row.published) : null),
+                                    h('div', { style: {} }, [
+                                        h('p', [
+                                            h('strong', { style: { color: '#75deef', marginRight: '8px' } }, '节点flags: '),
+                                            Array.isArray(params.row.flags) && params.row.flags.length > 0
+                                                ? h('div', { style: { display: 'inline-block', marginLeft: '15px' } }, params.row.flags.map(flag => {
+                                                    return h('span', {
+                                                        style: {
+                                                            display: 'inline-block',
+                                                            padding: '2px 8px',
+                                                            margin: '0 5px 5px 0',
+                                                            fontSize: '13px',
+                                                            fontFamily: "'Courier New', monospace",
+                                                            //background: 'rgba(13, 36, 81, 0.6)',
+                                                            color: '#75deef',
+                                                            //border: '1px solid rgba(117, 222, 239, 0.4)'
+                                                        }
+                                                    }, flag);
+                                                }))
+                                                : '暂无数据'
+                                        ]),
+                                    ])
+                                ]),
+                                h('Col', { props: { span: 12 } }, [
+                                    createInfoItem('Tor版本:', row.version),
+                                    createInfoItem('平台信息:', row.platform),
+                                    createInfoItem('VPS节点ID:', row.nodeId),
+                                    createInfoItem('容器ID:', row.containerId),
+                                    createInfoItem('容器名称:', row.containerName),
+                                    createInfoItem('Relay状态:', row.status),
+                                    createInfoItem('创建时间:', row.createdAt ? formatDate(row.createdAt) : null),
+                                    createInfoItem('更新时间:', row.updatedAt ? formatDate(row.updatedAt) : null),
+                                    createInfoItem('Relay类型:', row.relayType)
+                                ])
+                            ]),
+                        ]);
+                    }
+                },
+                {
+                    title: 'Relay ID',
+                    key: 'relayId',
+                    width: 150,
+                },
+                {
+                    title: '状态',
+                    key: 'status',
+                    width: 150,
+                    // render: (h, params) => {
+                    //     let color;
+                    //     switch (params.row.status) {
+                    //         case 'RELAY_RUNNING': color = 'success'; break;
+                    //         case 'RELAY_STOPPED': color = 'warning'; break;
+                    //         case 'RELAY_FAILED': color = 'error'; break;
+                    //         case 'RELAY_CREATING': color = 'primary'; break;
+                    //         case 'RELAY_DESTROYING': color = 'default'; break;
+                    //         default: color = 'default';
+                    //     }
+                    //     return h('Tag', {
+                    //         props: { color: color }
+                    //     }, params.row.status);
+                    // }
+                },
+                {
+                    title: '中继类型',
+                    key: 'relayType',
+                    width: 120
+                },
+                // {
+                //     title: '节点flags',
+                //     key: 'flags',
+                //     width: 150,
+                //     render: (h, params) => {
+                //         return h('p', [
+                //             Array.isArray(params.row.flags) && params.row.flags.length > 0
+                //                 ? h('div', { style: { display: 'inline-block', } }, params.row.flags.map(flag => {
+                //                     return h('span', {
+                //                         style: {
+                //                             display: 'inline-block',
+                //                             padding: '2px 8px',
+                //                             margin: '0 5px 0 0',
+                //                             //fontSize: '13px',
+                //                             //fontFamily: "'Courier New', monospace",
+                //                             //background: 'rgba(13, 36, 81, 0.6)',
+                //                             color: '#75deef',
+                //                             //border: '1px solid rgba(117, 222, 239, 0.4)'
+                //                         }
+                //                     }, flag);
+                //                 }))
+                //                 : '暂无数据'
+                //         ])
+                //     }
+                // },
+                {
+                    title: '操作',
+                    key: 'action',
+                    width: 250,
+                    render: (h, params) => {
+                        const btnStyle = {
+                            width: '250px',
+                            height: '30px',
+                            padding: '0 20px',
+                            borderRadius: '6px',
+                            //fontWeight: '600',
+                            fontSize: '12px',
+                            transition: 'all 0.3s ease',
+                            border: '1px solid #75deef',
+                            color: '#75deef',
+                            background: '#1a3c58',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        };
+
+                        return h('div', {
+                            style: {
+                                display: 'flex',
+                                gap: '10px'
+                            }
+                        }, [
+                            h('Button', {
+                                props: {
+                                    size: 'small'
+                                },
+                                style: {
+                                    ...btnStyle,
+                                    marginRight: '5px'
+                                },
+                                on: {
+                                    click: () => {
+                                        this.openRelayDialog('updateRelay', params.row);
+                                    }
+                                }
+                            }, '更新Relay信息'),
+                            h('Button', {
+                                props: {
+                                    size: 'small'
+                                },
+                                style: btnStyle,
+                                on: {
+                                    click: () => {
+                                        this.openRelayDialog('destroyRelay', params.row);
+                                    }
+                                }
+                            }, '销毁Relay')
+                        ]);
+                    }
+                }
+            ],
+            relayData: []
         };
     },
     watch: {
@@ -227,12 +457,104 @@ export default {
                     return;
                 }
                 this.node = nodeData;
+                this.fetchRelayData(nodeId);
             } catch (error) {
                 console.error('获取节点详情失败:', error);
                 this.$Message.error('获取节点详情失败');
             }
         },
 
+        async fetchRelayData(nodeId) {
+            if (this.useMock) {
+                // 模拟数据
+                this.relayData = Array(5).fill(0).map((_, index) => ({
+                    relayId: `relay-${nodeId}-${index + 1000}`,
+                    nickname: `Relay-${index}`,
+                    fingerprint: `FP${Math.random().toString(16).substring(2, 10).toUpperCase()}`,
+                    ipAddress: `192.168.1.${Math.floor(Math.random() * 255)}`,
+                    orPort: 9000 + Math.floor(Math.random() * 1000),
+                    dirPort: 8000 + Math.floor(Math.random() * 1000),
+                    bandwidth: Math.floor(Math.random() * 10000000),
+                    exitPolicy: Math.random() > 0.5 ? 'accept *:*' : 'reject *:*',
+                    published: new Date(Date.now() - Math.random() * 30 * 86400000),
+                    flags: ['Fast', 'Stable', 'Valid'].filter(() => Math.random() > 0.5),
+                    version: `0.${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}`,
+                    platform: ['Linux', 'Windows', 'macOS'][Math.floor(Math.random() * 3)],
+                    containerId: `c-${Math.random().toString(16).substring(2, 10)}`,
+                    containerName: `container-${index}`,
+                    status: ['RELAY_RUNNING', 'RELAY_STOPPED', 'RELAY_FAILED', 'RELAY_CREATING'][Math.floor(Math.random() * 4)],
+                    createdAt: new Date(Date.now() - Math.random() * 90 * 86400000),
+                    updatedAt: new Date(Date.now() - Math.random() * 10 * 86400000),
+                    relayType: ['ANONYMOUS', 'ACCESS', 'EXIT'][Math.floor(Math.random() * 3)]
+                }));
+                console.log(this.relayData);
+            } else {
+                try {
+                    // 实际项目中的API调用
+                    // const response = await axios.get(`/api/nodes/${nodeId}/relays`);
+                    // this.relayData = response.data;
+                } catch (error) {
+                    console.error('获取中继数据失败:', error);
+                }
+            }
+        },
+        openRelayDialog(action, relay) {
+            this.currentAction = action;
+            this.selectedRelay = relay;
+
+            if (action === 'updateRelay') {
+                this.dialogTitle = '更新Relay信息';
+                this.relayForm = {
+                    nickname: relay.nickname,
+                    type: relay.relayType
+                };
+            } else if (action === 'destroyRelay') {
+                this.dialogTitle = '销毁Relay';
+                this.dialogMessage = `确定要销毁Relay ${relay.relayId} 吗？此操作不可恢复。`;
+            }
+
+            this.dialogVisible = true;
+        },
+
+        async destroyRelay() {
+            try {
+                console.log('销毁Relay', this.selectedRelay);
+                if (this.useMock) {
+                    this.relayData = this.relayData.filter(r => r.relayId !== this.selectedRelay.relayId);
+                    this.node.relayCount--;
+                    this.$Message.success('Relay销毁成功');
+                    return;
+                }
+                // 实际项目中的API调用
+                // await axios.delete(`/api/relays/${this.selectedRelay.relayId}`);
+                // this.$Message.success('Relay销毁成功');
+                // this.fetchRelayData(this.nodeId);
+            } catch (error) {
+                console.error('销毁Relay失败:', error);
+                this.$Message.error('销毁Relay失败');
+            }
+        },
+        async updateRelayInfo() {
+            try {
+                console.log('更新Relay信息', this.selectedRelay, this.relayForm);
+                if (this.useMock) {
+                    const index = this.relayData.findIndex(r => r.relayId === this.selectedRelay.relayId);
+                    if (index !== -1) {
+                        this.relayData[index].nickname = this.relayForm.nickname;
+                        this.relayData[index].relayType = this.relayForm.type;
+                    }
+                    this.$Message.success('Relay信息更新成功');
+                    return;
+                }
+                // 实际项目中的API调用
+                // await axios.put(`/api/relays/${this.selectedRelay.relayId}`, this.relayForm);
+                // this.$Message.success('Relay信息更新成功');
+                // this.fetchRelayData(this.nodeId);
+            } catch (error) {
+                console.error('更新Relay信息失败:', error);
+                this.$Message.error('更新Relay信息失败');
+            }
+        },
         refresh() {
             if (this.nodeId) {
                 this.fetchNodeData(this.nodeId);
@@ -272,6 +594,10 @@ export default {
                     await this.fetchNodeData(this.nodeId);
                 } else if (this.currentAction === 'destroyNode') {
                     await this.deleteNode();
+                } else if (this.currentAction === 'destroyRelay') {
+                    await this.destroyRelay();
+                } else if (this.currentAction === 'updateRelay') {
+                    await this.updateRelayInfo();
                 }
                 this.dialogVisible = false;
             } catch (error) {
@@ -403,6 +729,7 @@ export default {
 @hover-bg: rgba(117, 222, 239, 0.1);
 @card-bg: #151456;
 
+
 .detail-page {
     padding: 16px;
     height: 100%;
@@ -465,8 +792,9 @@ export default {
             height: 280px;
 
             .detail-map {
-                flex: 2; // 地图占2/3空间
-                height: 100%;
+                //flex: 2; // 地图占2/3空间
+                height: 250px;
+                width: 400px;
                 position: relative;
                 border: 1px solid @border-color;
             }
@@ -481,8 +809,8 @@ export default {
                 box-sizing: border-box;
 
                 .ivu-btn {
-                    width: 100%; // 按钮宽度占满容器
-                    height: 50px; // 固定按钮高度
+                    width: 120px;
+                    height: 30px; // 固定按钮高度
                     margin: 0 0 12px 0; // 底部间距
                     padding: 0 20px;
                     border-radius: 6px;
@@ -622,5 +950,66 @@ export default {
     font-size: 11px !important;
     padding: 4px 8px !important;
     border-radius: 4px !important;
+}
+
+.expandable-table-card {
+    margin-top: 20px;
+
+    .expandable-table {
+        width: 100%;
+        //max-width: 99% !important;
+        border: 1px solid @bg-secondary !important;
+        border-radius: 4px;
+        overflow: hidden;
+        //margin-top: 20px;
+        background: @bg-secondary;
+
+        // /deep/ .ivu-table-wrapper {
+        //     width: 100% !important;
+        //     max-width: 100% !important;
+        //     overflow: hidden !important;
+        //     border: 1px solid @border-color !important;
+        // }
+
+        /deep/ .ivu-table {
+            background: @bg-secondary;
+            color: @text-primary;
+            margin: 0;
+            border: none !important;
+
+            &:before,
+            &:after {
+                display: none;
+                background-color: transparent !important;
+            }
+
+
+            th {
+                background: @bg-secondary;
+                color: @text-secondary;
+                border-bottom: 1px solid rgba(117, 222, 239, 0.6) !important;
+            }
+
+            td {
+                background: @border-color;
+                border-bottom: 1px solid rgba(13, 36, 81, 0.3);
+                border-left: none !important;
+            }
+
+            tr:first-child td {
+                border-top: none !important;
+            }
+
+            .ivu-table-row:hover td {
+                background-color: rgba(117, 222, 239, 0.1);
+            }
+
+            .ivu-table-expanded-cell {
+                //padding: 20px;
+                background: @bg-secondary;
+                color: @text-primary !important;
+            }
+        }
+    }
 }
 </style>
